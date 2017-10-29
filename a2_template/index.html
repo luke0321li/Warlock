@@ -1,0 +1,248 @@
+<!-- Graphics Example Code.  index.html - The web page document containing the canvas (drawing surface), that launches your javascript files.  By Garett //-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="assets/fav.ico">
+    <script type="text/javascript" src="tinywebgl-ucla.js"></script>
+    <!--  Javascript "include" files.  Any code in them gets executed as part of the page loading. //-->
+    <script type="text/javascript" src="dependencies.js"></script>
+    <script type="text/javascript" src="game.js"></script>
+    <script type="text/javascript" src="objects.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
+    <script type="text/javascript">
+        "use strict"
+        window.onload = function init() // ********************* THE ENTRY POINT OF THE WHOLE PROGRAM STARTS HERE ********************* 
+        {
+            window.contexts = {}; // A global variable, "contexts".  Browsers support up to 16 WebGL contexts per page.
+
+            const scenes = ["Game", "Movement_Controls", "Global_Info_Table"]; // Register some scenes to the "Canvas_Manager" object -- which WebGL calls
+            // upon every time a draw / keyboard / mouse event happens.  
+
+            if (eval("typeof " + scenes[0]) !== "undefined") {
+                document.getElementById("canvases").appendChild(Object.assign(document.createElement("canvas"), {
+                    id: "main_canvas",
+                    width: 800,
+                    height: 600
+                }));
+                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.9, .9, .9, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
+                for (let c in contexts) contexts[c].render(); // Call render() for each WebGL context on this page.  Then render() will re-queue itself for more calls.
+
+                Code_Manager.display_code(eval(scenes[0])); // Display the code for our demo on the page, starting with the first scene in the list.
+                for (let list of [core_dependencies, all_dependencies])
+                    document.querySelector("#class_list").rows[2].appendChild(Object.assign(document.createElement("td"), {
+                        innerHTML: list.reduce((acc, x) => acc += "<a href='javascript:void(0);' onclick='Code_Manager.display_code(" + x + ")'>" + x + "</a><br>", "")
+                    }));
+                document.getElementsByName("main_demo_link")[0].innerHTML = "<a href='javascript:void(0);' onclick='Code_Manager.display_code(" + scenes[0] + ")'>" + scenes[0] + "</a><br>";
+                document.querySelector("#code_display").innerHTML = "Below is the code for the demo that's running:<br>&nbsp;<br>" + document.querySelector("#code_display").innerHTML;
+            }
+
+            document.querySelector("#edit_button").addEventListener('click', () => {
+                code_panel.style.display = class_list.style.display = 'none';
+                new_demo_source_code.style.display = 'block';
+                document.getElementsByName('new_demo_code')[0].value = code_display.dataset.displayed.toString()
+            })
+            const form = document.forms.namedItem("new_demo_source_code");
+            form.addEventListener('submit', function(event) {
+                if (document.getElementsByName("finished")[0].checked)
+                    alert("Your demo will be submitted.  If approved, you will start being asked for a password to make any further updates to it.  This password " +
+                        "will appear right now, below the submit button, and then (assuming submission worked) it will never appear again.  Write it down.");
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/submit-demo?Unapproved", true);
+                xhr.responseType = "json";
+                xhr.onload = function(event) {
+                    if (xhr.status != 200) {
+                        document.querySelector("#submit_result").textContent = "Error " + xhr.status + " when trying to upload.";
+                        return
+                    }
+                    document.querySelector("#submit_result").textContent = this.response.message;
+                    // if( this.response.hide_finished_checkbox ) { document.getElementsByName( "finished" )[0].checked = false; expert_panel.style.display = "none" }
+                    if (this.response.show_password) document.getElementsByName("password")[0].style.display = "inline";
+                    if (this.response.show_overwrite) document.querySelector("#overwrite_panel").style.display = "inline";
+                };
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.send(JSON.stringify(Array.from(form.elements).reduce((accum, elem) => {
+                    if (elem.value && !(['checkbox', 'radio'].includes(elem.type) && !elem.checked)) accum[elem.name] = elem.value;
+                    return accum
+                }, {})));
+                event.preventDefault();
+            }, false);
+        }
+
+        // Below is the demo you will see when you run the program!    
+
+        /* class Tutorial_Animation extends Scene_Component // An example of a Scene_Component that our class Canvas_Manager can manage.  Like most, this one draws 3D shapes.
+        {
+            constructor(context) 
+            {
+                super(context);
+                var shapes = {
+                    'triangle': new Triangle(), // At the beginning of our program, instantiate all shapes we plan to use,
+                    'strip': new Square(), // each with only one instance in the graphics card's memory.
+                    'bad_tetrahedron': new Tetrahedron(false), // For example we would only create one "cube" blueprint in the GPU, but then 
+                    'tetrahedron': new Tetrahedron(true), // re-use it many times per call to display to get multiple cubes in the scene.
+                    'windmill': new Windmill(10)
+                };
+                this.submit_shapes(context, shapes);
+
+                // Place the camera, which is stored in a scratchpad for globals.  Secondly, setup the projection:  The matrix that determines how depth is treated.  It projects 3D points onto a plane.
+                Object.assign(context.globals.graphics_state, {
+                    camera_transform: Mat4.translation([0, 0, -25]),
+                    projection_transform: Mat4.perspective(Math.PI / 4, context.width / context.height, .1, 1000)
+                });
+
+                // *** Materials: *** Declare new ones as temps when needed; they're just cheap wrappers for some numbers.  1st parameter:  Color (4 floats in RGBA format),
+                // 2nd: Ambient light, 3rd: Diffuse reflectivity, 4th: Specular reflectivity, 5th: Smoothness exponent, 6th: Optional texture object, leave off for un-textured.
+                Object.assign(this, {
+                    purplePlastic: context.get_instance(Phong_Model).material(Color.of(.9, .5, .9, 1), .4, .4, .8, 40),
+                    greyPlastic: context.get_instance(Phong_Model).material(Color.of(.5, .5, .5, 1), .4, .8, .4, 20), // Smaller exponent means 
+                    blueGlass: context.get_instance(Phong_Model).material(Color.of(.5, .5, 1, .2), .4, .8, .4, 40), // a bigger shiny spot.
+                    fire: context.get_instance(Funny_Shader).material(),
+                    stars: context.get_instance(Phong_Model).material(Color.of(0, 0, 1, 1), .5, .5, .5, 40, context.get_instance("assets/stars.png"))
+                });
+            }
+            display(graphics_state) {
+                var model_transform = Mat4.identity(); // We begin with a brand new model_transform every frame.
+
+                // *** Lights: *** Values of vector or point lights over time.  Two different lights *per shape* supported by Phong_Shader; more requires changing a number in the vertex 
+                graphics_state.lights = [new Light(Vec.of(30, 30, 34, 1), Color.of(0, .4, 0, 1), 100000), // shader.  Arguments to construct a Light(): Light source position
+                    new Light(Vec.of(-10, -20, -14, 0), Color.of(1, 1, .3, 1), 100)
+                ]; // or vector (homogeneous coordinates), color, and size.  
+
+                model_transform.post_multiply(Mat4.translation([0, 5, 0]));
+                this.shapes.triangle.draw(graphics_state, model_transform, this.stars);
+
+                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
+                this.shapes.strip.draw(graphics_state, model_transform, this.greyPlastic);
+
+                var t = graphics_state.animation_time / 1000,
+                    tilt_spin = Mat4.rotation(12 * t, Vec.of(.1, .8, .1)),
+                    funny_orbit = Mat4.rotation(2 * t, Vec.of(Math.cos(t), Math.sin(t), .7 * Math.cos(t)));
+
+                // Many shapes can share influence of the same pair of lights, but they don't have to.  All the following shapes will use these lights instead of the above ones.
+                graphics_state.lights = [new Light(tilt_spin.times(Vec.of(30, 30, 34, 1)), Color.of(0, .4, 0, 1), 100000),
+                    new Light(tilt_spin.times(Vec.of(-10, -20, -14, 0)), Color.of(1, 1, .3, 1), 100 * Math.cos(t / 10))
+                ];
+
+                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
+                this.shapes.tetrahedron.draw(graphics_state, model_transform.times(funny_orbit), this.purplePlastic);
+
+                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
+                this.shapes.bad_tetrahedron.draw(graphics_state, model_transform.times(funny_orbit), this.greyPlastic);
+
+                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
+                this.shapes.windmill.draw(graphics_state, model_transform.times(tilt_spin), this.purplePlastic);
+                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
+                this.shapes.windmill.draw(graphics_state, model_transform, this.fire);
+                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
+                this.shapes.windmill.draw(graphics_state, model_transform, this.blueGlass);
+            }
+        } */
+        
+        
+
+    </script>
+    <style>
+        table {
+            border-collapse: collapse;
+            display: block;
+            overflow-x: auto;
+        }
+
+        table,
+        th,
+        td {
+            border: 2px solid black;
+            vertical-align: top;
+            white-space: nowrap
+        }
+
+        th,
+        td {
+            overflow: hidden;
+        }
+
+        button {
+            position: relative;
+            background-color: #4C9F50;
+            color: white;
+            padding: 6px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            transition: background-color .3s, transform .3s
+        }
+
+        button:hover,
+        button:focus {
+            transform: scale(1.2);
+            color: gold
+        }
+
+        .dropdown {
+            display: inline-block
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 100px;
+            overflow: auto;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2)
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 4px 4px;
+            display: block
+        }
+
+        .dropdown a:hover {
+            background-color: #f1f1f1
+        }
+
+        .show {
+            display: inline-block
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="explanation_section"></div>
+    <div id="canvases"></div>
+    <table id="control_buttons" class="dropdown" style="display:block; width: 70%;  border: 0px; margin: 0 0 50px 0">
+        <tr></tr>
+    </table>
+    <div id="code_panel" style="font-family: monospace; white-space: pre; margin: 50px 0">
+        <div id="code_display" data-displayed=""></div>
+        <button id="edit_button" style="display:none">Start editing</button>
+        <table id="class_list" class="dropdown" style="display:block; border: 0px; border-spacing: 10px ">
+            <tr>
+                <td colspan="2">Click below to navigate through all classes that are defined. <br>&nbsp;<br>Main demo: <span name="main_demo_link"></span></td>
+            </tr>
+            <tr style="text-align:center">
+                <td>tinywebgl-ucla.js</td>
+                <td>dependencies.js</td>
+            </tr>
+            <tr></tr>
+        </table>
+    </div>
+    <form name="new_demo_source_code" style="display:none">
+        <p style="margin: 50px 0"><i><b>What can I put here?</b></i> A JavaScript class, with any valid JavaScript inside. Your code can use classes from this demo, or from ANY demo on the encyclopedia of code -- the dependencies will automatically be pulled in to run your demo!<br></p>
+        <textarea rows="30" cols="140" name="new_demo_code"></textarea><br>
+        <div id="submit_result" style="margin: 10px 0"></div>
+        <button type="submit" style="margin: 0px 50px 0px 0px">Save as new webpage</button>
+        <input type="text" name="author" placeholder="Author name">
+        <input type="text" name="password" placeholder="Password" style="display:none">
+        <span id="overwrite_panel" style="display:none"><label>Overwrite?<input type="checkbox" name="overwrite" autocomplete="off"></label></span>
+        <span id="beginner_panel"><label>Beginner Mode<input type="checkbox" checked onchange="document.querySelector('#expert_panel').style.display='block'; beginner_panel.style.display='none'"></label></span>
+        <div id="expert_panel" style="display:none;"><label><input type="checkbox" name="finished" autocomplete="off">
+    Optional:  This demo is finished; consider it for public listing on the main page.  
+    I believe that this demo is the one true way to minimalistically do what its name says.
+    The code's readability and structure are so good as to maximize how easy it is to memorize it.
+    </label></div>
+    </form>
+</body>
+
+</html>

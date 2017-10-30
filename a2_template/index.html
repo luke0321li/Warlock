@@ -17,7 +17,7 @@
         {
             window.contexts = {}; // A global variable, "contexts".  Browsers support up to 16 WebGL contexts per page.
 
-            const scenes = ["Game", "Movement_Controls", "Global_Info_Table"]; // Register some scenes to the "Canvas_Manager" object -- which WebGL calls
+            const scenes = ["Game", "Global_Info_Table"]; // Register some scenes to the "Canvas_Manager" object -- which WebGL calls
             // upon every time a draw / keyboard / mouse event happens.  
 
             if (eval("typeof " + scenes[0]) !== "undefined") {
@@ -69,79 +69,7 @@
                 event.preventDefault();
             }, false);
         }
-
-        // Below is the demo you will see when you run the program!    
-
-        /* class Tutorial_Animation extends Scene_Component // An example of a Scene_Component that our class Canvas_Manager can manage.  Like most, this one draws 3D shapes.
-        {
-            constructor(context) 
-            {
-                super(context);
-                var shapes = {
-                    'triangle': new Triangle(), // At the beginning of our program, instantiate all shapes we plan to use,
-                    'strip': new Square(), // each with only one instance in the graphics card's memory.
-                    'bad_tetrahedron': new Tetrahedron(false), // For example we would only create one "cube" blueprint in the GPU, but then 
-                    'tetrahedron': new Tetrahedron(true), // re-use it many times per call to display to get multiple cubes in the scene.
-                    'windmill': new Windmill(10)
-                };
-                this.submit_shapes(context, shapes);
-
-                // Place the camera, which is stored in a scratchpad for globals.  Secondly, setup the projection:  The matrix that determines how depth is treated.  It projects 3D points onto a plane.
-                Object.assign(context.globals.graphics_state, {
-                    camera_transform: Mat4.translation([0, 0, -25]),
-                    projection_transform: Mat4.perspective(Math.PI / 4, context.width / context.height, .1, 1000)
-                });
-
-                // *** Materials: *** Declare new ones as temps when needed; they're just cheap wrappers for some numbers.  1st parameter:  Color (4 floats in RGBA format),
-                // 2nd: Ambient light, 3rd: Diffuse reflectivity, 4th: Specular reflectivity, 5th: Smoothness exponent, 6th: Optional texture object, leave off for un-textured.
-                Object.assign(this, {
-                    purplePlastic: context.get_instance(Phong_Model).material(Color.of(.9, .5, .9, 1), .4, .4, .8, 40),
-                    greyPlastic: context.get_instance(Phong_Model).material(Color.of(.5, .5, .5, 1), .4, .8, .4, 20), // Smaller exponent means 
-                    blueGlass: context.get_instance(Phong_Model).material(Color.of(.5, .5, 1, .2), .4, .8, .4, 40), // a bigger shiny spot.
-                    fire: context.get_instance(Funny_Shader).material(),
-                    stars: context.get_instance(Phong_Model).material(Color.of(0, 0, 1, 1), .5, .5, .5, 40, context.get_instance("assets/stars.png"))
-                });
-            }
-            display(graphics_state) {
-                var model_transform = Mat4.identity(); // We begin with a brand new model_transform every frame.
-
-                // *** Lights: *** Values of vector or point lights over time.  Two different lights *per shape* supported by Phong_Shader; more requires changing a number in the vertex 
-                graphics_state.lights = [new Light(Vec.of(30, 30, 34, 1), Color.of(0, .4, 0, 1), 100000), // shader.  Arguments to construct a Light(): Light source position
-                    new Light(Vec.of(-10, -20, -14, 0), Color.of(1, 1, .3, 1), 100)
-                ]; // or vector (homogeneous coordinates), color, and size.  
-
-                model_transform.post_multiply(Mat4.translation([0, 5, 0]));
-                this.shapes.triangle.draw(graphics_state, model_transform, this.stars);
-
-                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
-                this.shapes.strip.draw(graphics_state, model_transform, this.greyPlastic);
-
-                var t = graphics_state.animation_time / 1000,
-                    tilt_spin = Mat4.rotation(12 * t, Vec.of(.1, .8, .1)),
-                    funny_orbit = Mat4.rotation(2 * t, Vec.of(Math.cos(t), Math.sin(t), .7 * Math.cos(t)));
-
-                // Many shapes can share influence of the same pair of lights, but they don't have to.  All the following shapes will use these lights instead of the above ones.
-                graphics_state.lights = [new Light(tilt_spin.times(Vec.of(30, 30, 34, 1)), Color.of(0, .4, 0, 1), 100000),
-                    new Light(tilt_spin.times(Vec.of(-10, -20, -14, 0)), Color.of(1, 1, .3, 1), 100 * Math.cos(t / 10))
-                ];
-
-                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
-                this.shapes.tetrahedron.draw(graphics_state, model_transform.times(funny_orbit), this.purplePlastic);
-
-                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
-                this.shapes.bad_tetrahedron.draw(graphics_state, model_transform.times(funny_orbit), this.greyPlastic);
-
-                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
-                this.shapes.windmill.draw(graphics_state, model_transform.times(tilt_spin), this.purplePlastic);
-                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
-                this.shapes.windmill.draw(graphics_state, model_transform, this.fire);
-                model_transform.post_multiply(Mat4.translation([0, -2, 0]));
-                this.shapes.windmill.draw(graphics_state, model_transform, this.blueGlass);
-            }
-        } */
         
-        
-
     </script>
     <style>
         table {

@@ -23,10 +23,10 @@
             if (eval("typeof " + scenes[0]) !== "undefined") {
                 document.getElementById("canvases").appendChild(Object.assign(document.createElement("canvas"), {
                     id: "main_canvas",
-                    width: 800,
-                    height: 600
+                    width: 1080,
+                    height: 800
                 }));
-                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.9, .9, .9, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
+                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.2, .2, .2, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
                 for (let c in contexts) contexts[c].render(); // Call render() for each WebGL context on this page.  Then render() will re-queue itself for more calls.
 
                 Code_Manager.display_code(eval(scenes[0])); // Display the code for our demo on the page, starting with the first scene in the list.

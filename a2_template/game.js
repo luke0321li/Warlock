@@ -1,14 +1,14 @@
-/*var wall_width = 2;
-var wall_height = 10;
-var door_width = 8;
+var wall_width = 1;
+var wall_height = 5;
+var door_width = 4;
 var room_thickness = .1;
-var room_size = 30;*/
+var room_size = 20;
 
-var wall_width = 0.5;
+/* var wall_width = 0.5;
 var wall_height = 2.5;
 var door_width = 2;
 var room_thickness = 0.025;
-var room_size = 7.5;
+var room_size = 7.5; */
 
 class Game extends Scene_Component // Main game engine
 {
@@ -32,16 +32,17 @@ class Game extends Scene_Component // Main game engine
             origin: Mat4.identity(),
             Phong_Model: context.get_instance(Phong_Model),
             camera_angle: Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0)),
-            camera_location: Mat4.translation([0, -200, -10])
+            camera_location: Mat4.translation([0, -200, -10]),
+            view_mode: "Aerial"
         });
 
         Object.assign(this, {
             test: this.Phong_Model.material(Color.of(.8, .7, .6, 1), 1, 1, .2, 40),
-            arena_grey: this.Phong_Model.material(Color.of(.33, .33, .33, 1), 1, 1, .2, 40),
-            rand_1: this.Phong_Model.material(Color.of(rand_num(0, .5), rand_num(0, .5), rand_num(0, .5), 1), 1, 1, .2, 40)
+            arena_grey: this.Phong_Model.material(Color.of(.335, .335, .347, 1), 1, 1, .2, 40),
+            rand_1: this.Phong_Model.material(Color.of(rand_num(.4, .7), rand_num(.4, .7), rand_num(.4, .7), 1), 1, 1, 1, 40)
         });
 
-        this.arena = new Arena(35, 15, room_size, room_thickness);
+        this.arena = new Arena(15, 10, room_size, room_thickness);
         this.make_buttons();
     }
 
@@ -69,6 +70,18 @@ class Game extends Scene_Component // Main game engine
             this.player.velocity[0] = 1;
         }, undefined, function () {
             this.player.velocity[0] = 0;
+        });
+
+        this.key_triggered_button("Toggle aerial view", "A", function () {
+            if (this.view_mode == "Aerial") {
+                this.camera_angle = Mat4.rotation(.1, Vec.of(1, 0, 0));
+                this.camera_location = Mat4.translation([0, -4, -6]);
+                this.view_mode = "Default";
+            } else {
+                this.camera_angle = Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0));
+                this.camera_location = Mat4.translation([0, -200, -10]);
+                this.view_mode = "Aerial";
+            }
         });
     }
 
@@ -107,10 +120,17 @@ class Game extends Scene_Component // Main game engine
         for (var i in this.arena.rooms) {
             let pos = Mat4.translation(this.arena.rooms[i].center);
             let size = Mat4.scale(this.arena.rooms[i].size);
+            // Draw floor
             this.shapes.box.draw(graphics_state, pos.times(size), this.arena_grey);
+
+            // Draw ceiling
+            // if (this.view_mode == "Default")
+               // this.shapes.box.draw(graphics_state, pos.times(Mat4.translation([0, wall_height * 2, 0])).times(size), this.arena_grey);
+
 
             let rotate = Mat4.rotation(Math.PI, Vec.of(0, 1, 0));
 
+            // Draw walls
             if (this.arena.rooms[i].doors[0])
                 this.draw_doored_wall(graphics_state, pos, 0);
             else
@@ -130,7 +150,7 @@ class Game extends Scene_Component // Main game engine
                 this.draw_doored_wall(graphics_state, pos, 3);
             else
                 this.shapes.box.draw(graphics_state, pos.times(rotate).times(left_wall_trans).times(left_wall_scale), this.arena_grey);
-
+            
         }
     }
 
@@ -169,17 +189,18 @@ class Game extends Scene_Component // Main game engine
     }
 
     draw_player(graphics_state) {
-        this.player.pos = add_lists(this.player.pos, this.player.velocity.times(0.5));
+        this.player.pos = this.player.pos.plus(this.player.velocity.times(0.5));
         let player_matrix = Mat4.translation(this.player.pos)
-        this.shapes.box.draw(graphics_state, player_matrix.times(Mat4.scale([2, 2, 2])), this.rand_1);
+        this.shapes.box.draw(graphics_state, player_matrix.times(Mat4.scale([.7, 1, .7])), this.rand_1);
     }
 
     display(graphics_state) // Draw everything in the game!
     {
         let t = graphics_state.animation_time / 1000;
         graphics_state.lights = [
-            new Light(Vec.of(room_size, room_size, 34, 1), Color.of(1, 1, 1, 1), 100000), // Lights for Phong_Shader to use*/
-            new Light(Vec.of(10, 20, 10, 0), Color.of(0.5, 0.5, 0.5, 1), 10)
+            new Light(Vec.of(20, 100, 20, 1), Color.of(1, 1, 1, 1), 100000), // Lights for Phong_Shader to use*/
+            // new Light(this.player.pos.plus(Vec.of(0, 5, 0)).to4(1), Color.of(2, 4, 2, 1), 1000000),
+            // new Light(Vec.of(-10, -20, -14, 0), Color.of(1, 1, 3, 1), 100)
         ];
 
         this.draw_arena(graphics_state);

@@ -27,7 +27,7 @@ class Demo_Scene extends Scene_Component // A demo scene
         Object.assign(this, {
             test: this.Phong_Model.material(Color.of(.8, .7, .6, 1), 1, 1, .2, 40),
             test_2: this.Phong_Model.material(Color.of(.43, .42, .66, 1), 1, 1, .2, 40),
-            rand_1: this.Phong_Model.material(Color.of(randNumBetween(0, .5), randNumBetween(0, .5), randNumBetween(0, .5), 1), 1, 1, .2, 40),
+            rand_1: this.Phong_Model.material(Color.of(randNumBetween(0, .5), randNumBetween(0, .5), randNumBetween(0, .5), 1), 1, 1, 1, 40),
             moving: [0, 0, 0]
         });
         

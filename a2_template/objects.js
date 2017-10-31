@@ -19,7 +19,7 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
 
 class Player extends Game_Object {
     constructor(game) {
-        super(game, 100, [2, 2, 2], [0, 2.1, 0]);
+        super(game, 100, Vec.of(2, 2, 2), Vec.of(0, 2.1, 0));
     }
 }
 
@@ -68,7 +68,7 @@ class Arena {
             if (z - 1 >= 0 && this.map[x][z - 1])
                 num_neighbors += 1;
             
-            if (num_neighbors >= 2)
+            if (num_neighbors >= rand_int(2, 4))
                 return;
             
             this.map[x][z] = 1;

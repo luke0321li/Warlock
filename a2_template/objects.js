@@ -1,11 +1,12 @@
 class Game_Object // Base class for player, mobs, items and projectiles etc.
 {
-    constructor(game, hp, collision_box, init_pos) {
-        game.object_list.push(this);
+    constructor(game, hp, collision_box, init_pos, type) {
+        // game.object_list.push(this);
+        this.game = game;
         this.hp = hp;
         this.collision_box = collision_box;
         this.pos = Vec.of(init_pos[0], init_pos[1], init_pos[2]);
-        this.velocity = Vec.of(0, 0, 0);
+        this.type = type;
     }
 
     kill() {
@@ -13,124 +14,70 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
     }
 
     is_alive() {
-        return (this.hp != 0);
+        return (this.hp > 0);
+    }
+    
+    draw(graphics_state) {}
+}
+
+class Moving_Object extends Game_Object {
+    constructor(game, hp, collision_box, init_pos, init_a, init_v, init_alpha, init_omega, init_angle, v_cap)
+    {
+        super(game, hp, collision_box, init_pos, "moving");
+        this.a = init_a;
+        this.v = init_v;
+        this.alpha = init_alpha;
+        this.omega = init_omega;
+        this.angle = init_angle;
+        this.v_cap = v_cap;
+    }
+    
+    move(dt)
+    {
+        this.omega = this.omega + (this.alpha * (dt));
+        this.angle = this.angle + (this.omega * (dt));
+        this.v = this.v.plus(this.a.times(dt));
+        if (this.v.norm() >= this.v_cap)
+            this.v = this.v.normalized().times(this.v_cap);
+        let r_1 = Vec.of(Math.cos(this.angle), 0, Math.sin(this.angle));
+        let r_2 = Vec.of(-1 * Math.sin(this.angle), 0, Math.cos(this.angle));
+        let v_alter = Vec.of(this.v.dot(r_1), this.v[1], this.v.dot(r_2));
+        this.pos = this.pos.plus(v_alter.times(dt));
     }
 }
 
-class Player extends Game_Object {
+class Projectile extends Moving_Object {
+     constructor(game, source, speed, minus_hp) {
+        super(game, 20, Vec.of(1, 1, 1), source.pos, Vec.of(0, 0, 0), Vec.of(0, 0, -1 * speed), 0, 0, source.angle, speed);
+        this.minus_hp = minus_hp;
+    }
+    
+    move(dt)
+    {
+        super.move(dt);
+        this.hp -= this.minus_hp;
+    }
+}
+
+class Fire_bolt extends Projectile {
+    constructor(game, source) {
+        super(game, source, 10, 1)
+    }
+
+    draw(graphics_state) {
+        let mat = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
+        this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale([.2, .2, .2])), this.game.rand_1);
+    }
+}
+
+class Player extends Moving_Object {
     constructor(game) {
-        super(game, 100, Vec.of(2, 2, 2), Vec.of(0, 2.1, 0));
+        super(game, 100, Vec.of(2, 2, 2), Vec.of(0, 2.1, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 0), 0, 0, 0, 5);
+    }
+    
+    draw(graphics_state) {
+        let player_matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
+        this.game.shapes.box.draw(graphics_state, player_matrix.times(Mat4.scale([1, 1.7, 1])), this.game.rand_1);
     }
 }
 
-class Arena {
-    constructor(num_rooms, map_size, room_size, room_thickness) {
-        this.max_rooms = num_rooms;
-        this.map_size = map_size;
-        this.room_size = room_size;
-        this.room_thickness = room_thickness;
-        this.map = [];
-        this.rooms = [];
-        this.init_x = Math.floor(this.map_size / 2);
-        this.init_z = this.init_x;
-        this.cur_rooms = 0;
-
-        this.create_empty_map();
-        this.create_map(this.init_x, this.init_z);
-
-        while (this.cur_rooms < (this.max_rooms * 2 / 3)) {
-            this.create_empty_map();
-            this.create_map(this.init_x, this.init_z);
-        }
-
-        this.make_rooms();
-    }
-
-    create_empty_map() {
-        this.cur_rooms = 0;
-        this.map = new Array(this.map_size);
-        for (let i = 0; i < this.map_size; i++) {
-            this.map[i] = new Array(this.map_size);
-            for (let j = 0; j < this.map_size; j++)
-                this.map[i][j] = 0;
-        }
-    }
-
-    create_map(x, z) {
-        if (this.cur_rooms < this.max_rooms && !this.map[x][z]) {
-            var num_neighbors = 0;
-            if (x + 1 < this.map_size && this.map[x + 1][z])
-                num_neighbors += 1;
-            if (x - 1 >= 0 && this.map[x - 1][z])
-                num_neighbors += 1;
-            if (z + 1 < this.map_size && this.map[x][z + 1])
-                num_neighbors += 1;
-            if (z - 1 >= 0 && this.map[x][z - 1])
-                num_neighbors += 1;
-            
-            if (num_neighbors >= rand_int(2, 4))
-                return;
-            
-            this.map[x][z] = 1;
-            this.cur_rooms += 1;
-
-            if (x + 1 < this.map_size && rand_int(0, 2))
-                this.create_map(x + 1, z);
-            if (x - 1 >= 0 && rand_int(0, 2))
-                this.create_map(x - 1, z);
-            if (z + 1 < this.map_size && rand_int(0, 2))
-                this.create_map(x, z + 1);
-            if (z - 1 >= 0 && rand_int(0, 2))
-                this.create_map(x, z - 1);
-        }
-    }
-
-    make_rooms() {
-        for (let i = 0; i < this.map_size; i++) {
-            for (let j = 0; j < this.map_size; j++) {
-                if (this.map[i][j]) {
-                    let doors = [0, 0, 0, 0];
-                    if (i > 0 && this.map[i - 1][j])
-                        doors[2] = 1;
-                    if (i < this.map_size - 1 && this.map[i + 1][j])
-                        doors[3] = 1;
-                    if (j > 0 && this.map[i][j - 1])
-                        doors[0] = 1;
-                    if (j < this.map_size - 1 && this.map[i][j + 1])
-                        doors[1] = 1;
-                    let x = (i - this.init_x) * this.room_size * 2;
-                    let z = (j - this.init_z) * this.room_size * 2;
-                    this.rooms.push(new Square_Room(x, this.room_thickness, z, this.room_size, doors));
-                }
-            }
-        }
-    }
-}
-
-// Doors: [top, bot, left, right]
-class Room {
-    constructor(x, z, length, thickness, width, doors) {
-        this.center = [x, 0, z]
-        this.size = [length, thickness, width]
-        this.vertexes = [[x + length, thickness, z + width], [x - length, thickness, z + width], [x - length, thickness, z - width], [x + length, thickness, z - width]];
-        this.doors = doors;
-    }
-}
-
-class Square_Room extends Room {
-    constructor(x, y, z, size, doors) {
-        super(x, z, size, y, size, doors);
-    }
-}
-
-class Horizontal_Rect_Room extends Room {
-    constructor(x, y, z, size, doors) {
-        super(x, z, size * 2, y, size, doors);
-    }
-}
-
-class Vertical_Rect_Room extends Room {
-    constructor(x, y, z, size, doors) {
-        super(x, z, size, y, size * 2, doors);
-    }
-}

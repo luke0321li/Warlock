@@ -48,31 +48,54 @@ class Game extends Scene_Component // Main game engine
 
     make_buttons() // Set up the control keys
     {
-        this.key_triggered_button("Move forward", "I", function () {
-            this.player.velocity[2] = -1;
+        this.key_triggered_button("Move forward", "W", function () {
+            this.player.a[2] = -1;
         }, undefined, function () {
-            this.player.velocity[2] = 0;
+            this.player.a[2] = 0;
+            this.player.v[2] = 0;
         });
 
-        this.key_triggered_button("Move backward", "K", function () {
-            this.player.velocity[2] = 1;
+        this.key_triggered_button("Move backward", "S", function () {
+            this.player.a[2] = 1;
         }, undefined, function () {
-            this.player.velocity[2] = 0;
+            this.player.a[2] = 0;
+            this.player.v[2] = 0;
         });
 
-        this.key_triggered_button("Move left", "J", function () {
-            this.player.velocity[0] = -1;
+        this.key_triggered_button("Move left", "A", function () {
+            this.player.a[0] = -1;
         }, undefined, function () {
-            this.player.velocity[0] = 0;
+            this.player.a[0] = 0;
+            this.player.v[0]= 0;
         });
 
-        this.key_triggered_button("Move right", "L", function () {
-            this.player.velocity[0] = 1;
+        this.key_triggered_button("Move right", "D", function () {
+            this.player.a[0] = 1;
         }, undefined, function () {
-            this.player.velocity[0] = 0;
+            this.player.a[0] = 0;
+            this.player.v[0] = 0;
         });
+        
+        this.key_triggered_button("Turn left", "Q", function () {
+            this.player.alpha = 1;
+        }, undefined, function () {
+            this.player.alpha = 0;
+            this.player.omega = 0;
+        });
+        
+        this.key_triggered_button("Turn right", "E", function () {
+            this.player.alpha = -1;
+        }, undefined, function () {
+            this.player.alpha = 0;
+            this.player.omega = 0;
+        });
+        
+        this.key_triggered_button("Pew pew", "J", function () {
+            this.object_list.push(new Fire_bolt(this, this.player));
+        }, undefined, function () {}
+        );
 
-        this.key_triggered_button("Toggle aerial view", "A", function () {
+        this.key_triggered_button("Toggle aerial view", "K", function () {
             if (this.view_mode == "Aerial") {
                 this.camera_angle = Mat4.rotation(.1, Vec.of(1, 0, 0));
                 this.camera_location = Mat4.translation([0, -4, -6]);
@@ -105,7 +128,7 @@ class Game extends Scene_Component // Main game engine
 
     update_camera(graphics_state) // Let the camera follow the player!
     {
-        let camera_pos = Mat4.translation([this.player.pos[0] * -1 + this.player.velocity[0] * -0.5, 0, this.player.pos[2] * -1 + this.player.velocity[2] * -0.5]).times(this.camera_location);
+        let camera_pos = this.camera_location.times(Mat4.rotation(this.player.angle * -1, Vec.of(0, 1, 0))).times(Mat4.translation(this.player.pos.times(-1)));
         graphics_state.camera_transform = this.camera_angle.times(camera_pos);
     }
 
@@ -189,9 +212,7 @@ class Game extends Scene_Component // Main game engine
     }
 
     draw_player(graphics_state) {
-        this.player.pos = this.player.pos.plus(this.player.velocity.times(0.5));
-        let player_matrix = Mat4.translation(this.player.pos)
-        this.shapes.box.draw(graphics_state, player_matrix.times(Mat4.scale([.7, 1, .7])), this.rand_1);
+        this.player.draw(graphics_state);
     }
 
     display(graphics_state) // Draw everything in the game!
@@ -204,7 +225,14 @@ class Game extends Scene_Component // Main game engine
         ];
 
         this.draw_arena(graphics_state);
+        for (var i in this.object_list) {
+            if (this.object_list[i].is_alive()) {
+                this.object_list[i].move(0.15);
+                this.object_list[i].draw(graphics_state);
+            }
+        }
         // this.collision_check();
+        this.player.move(0.15);
         this.update_camera(graphics_state);
         this.draw_player(graphics_state);
     }

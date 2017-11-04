@@ -27,7 +27,7 @@
                     width: 1080,
                     height: 800
                 }));
-                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.2, .2, .2, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
+                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.8, .8, .8, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
                 for (let c in contexts) contexts[c].render(); // Call render() for each WebGL context on this page.  Then render() will re-queue itself for more calls.
 
                 Code_Manager.display_code(eval(scenes[0])); // Display the code for our demo on the page, starting with the first scene in the list.
@@ -70,7 +70,6 @@
                 event.preventDefault();
             }, false);
         }
-        
     </script>
     <style>
         table {
@@ -133,7 +132,6 @@
         .show {
             display: inline-block
         }
-
     </style>
 </head>
 

@@ -84,9 +84,9 @@ class Arena {
     }
 
     configure_rooms() {
-        let top_wall_trans = Vec.of(0, 5.1, -1 * 19);
+        let top_wall_trans = Vec.of(0, 5.1, -19);
         let bot_wall_trans = Vec.of(0, 5.1, 19);
-        let left_wall_trans = Vec.of(-1 * 19, 5.1, 0);
+        let left_wall_trans = Vec.of(-19, 5.1, 0);
         let right_wall_trans = Vec.of(19, 5.1, 0);
 
         let sides = [-19, 19];
@@ -97,60 +97,61 @@ class Arena {
             this.game.object_list.push(new Room_base(this.game, pos));
 
             // Create walls and boundaries if there should be any
-            // if (this.rooms[i].doors[0])
 
-            this.game.object_list.push(new Wall(this.game, pos.plus(top_wall_trans), 20, 0));
-            // if (!this.rooms[i].doors[1])
-            this.game.object_list.push(new Wall(this.game, pos.plus(bot_wall_trans), 20, 0));
-            // if (!this.rooms[i].doors[2])
-            this.game.object_list.push(new Wall(this.game, pos.plus(left_wall_trans), 18, Math.PI / 2));
-            // if (!this.rooms[i].doors[3])
-            this.game.object_list.push(new Wall(this.game, pos.plus(right_wall_trans), 18, Math.PI / 2));
+            if (this.rooms[i].doors[0]) {
+                let length = rand_num(5, 9);
+                if (!rand_int(0, 3))
+                    length = 2;
+                let pos_1 = Vec.of(20 - length, 5.1, -19);
+                let pos_2 = Vec.of(20 - length, 5.1, -21);
+                this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, 0));
+                this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, 0));
 
-            /* for (var j in sides) {
-                for (var k in sides) {
-                    this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(sides[j], 6.1, sides[k])), 6, 0));
+            } 
+            else
+                this.game.object_list.push(new Wall(this.game, pos.plus(top_wall_trans), 20, 0));
+
+            if (this.rooms[i].doors[1]) {
+                let length = rand_num(5, 9);
+                if(!rand_int(0, 3))
+                    length = 2;
+                let pos_1 = Vec.of(-20 + length, 5.1, 19);
+                let pos_2 = Vec.of(-20 + length, 5.1, 21);
+                this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, 0));
+                this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, 0));
+            } 
+            else
+                this.game.object_list.push(new Wall(this.game, pos.plus(bot_wall_trans), 20, 0));
+
+            if (this.rooms[i].doors[2]) {
+                if (rand_int(0, 3)) {
+                    let length = rand_num(5, 7);
+                    let pos_1 = Vec.of(-19, 5.1, -18 + length);
+                    let pos_2 = Vec.of(-21, 5.1, -18 + length);
+                    this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, Math.PI / 2));
+                    this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, Math.PI / 2));
                 }
-            } */
+            } 
+            else
+                this.game.object_list.push(new Wall(this.game, pos.plus(left_wall_trans), 18, Math.PI / 2));
+
+            if (this.rooms[i].doors[3]) {
+                if (rand_int(0, 3)) {
+                    let length = rand_num(5, 7);
+                    let pos_1 = Vec.of(19, 5.1, 18 - length);
+                    let pos_2 = Vec.of(21, 5.1, 18 - length);
+                    this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, Math.PI / 2));
+                    this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, Math.PI / 2));
+                }
+            } 
+            else
+                this.game.object_list.push(new Wall(this.game, pos.plus(right_wall_trans), 18, Math.PI / 2));
         }
     }
 
+
+
 }
-
-
-/* draw_doored_wall(graphics_state, room_pos, direction) {
-    let top_x = -1 * (door_width + (room_size - door_width) / 2);
-    let top_z = -1 * (room_size - wall_width);
-    let left_x = -1 * (room_size - wall_width);
-    let left_z = -1 * (door_width + (room_size - 2 * wall_width - door_width) / 2);
-    let top_left_trans = Mat4.translation([top_x, wall_height + room_thickness, top_z]);
-    let top_right_trans = Mat4.translation([-1 * top_x, wall_height + room_thickness, top_z]);
-    let left_top_trans = Mat4.translation([left_x, wall_height + room_thickness, left_z]);
-    let left_bot_trans = Mat4.translation([left_x, wall_height + room_thickness, -1 * left_z]);
-
-    let rotate = Mat4.rotation(Math.PI, Vec.of(0, 1, 0));
-    let top_scale = Mat4.scale([(room_size - door_width) / 2, wall_height, wall_width]);
-    let left_scale = Mat4.scale([wall_width, wall_height, (room_size - 2 * wall_width - door_width) / 2]);
-
-    switch (direction) {
-        case 0:
-            this.game.shapes.box.draw(graphics_state, room_pos.times(top_left_trans).times(top_scale), this.game.arena_grey);
-            this.game.shapes.box.draw(graphics_state, room_pos.times(top_right_trans).times(top_scale), this.game.arena_grey);
-            break;
-        case 1:
-            this.game.shapes.box.draw(graphics_state, room_pos.times(rotate).times(top_left_trans).times(top_scale), this.game.arena_grey);
-            this.game.shapes.box.draw(graphics_state, room_pos.times(rotate).times(top_right_trans).times(top_scale), this.game.arena_grey);
-            break;
-        case 2:
-            this.game.shapes.box.draw(graphics_state, room_pos.times(left_top_trans).times(left_scale), this.game.arena_grey);
-            this.game.shapes.box.draw(graphics_state, room_pos.times(left_bot_trans).times(left_scale), this.game.arena_grey);
-            break;
-        case 3:
-            this.game.shapes.box.draw(graphics_state, room_pos.times(rotate).times(left_top_trans).times(left_scale), this.game.arena_grey);
-            this.game.shapes.box.draw(graphics_state, room_pos.times(rotate).times(left_bot_trans).times(left_scale), this.game.arena_grey);
-            break;
-    }
-} */
 
 // Doors: [top, bot, left, right]
 class Room {

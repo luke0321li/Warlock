@@ -7,7 +7,3 @@ function rand_int(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min;
 }
-
-function add_lists(list_1, list_2) {
-    return [list_1[0] + list_2[0], list_1[1] + list_2[1], list_1[2] + list_2[2]];
-}

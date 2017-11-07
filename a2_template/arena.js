@@ -107,50 +107,62 @@ class Arena {
                 this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, 0));
                 this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, 0));
 
-            } 
-            else
+            } else
                 this.game.object_list.push(new Wall(this.game, pos.plus(top_wall_trans), 20, 0));
 
             if (this.rooms[i].doors[1]) {
                 let length = rand_num(5, 9);
-                if(!rand_int(0, 3))
+                if (!rand_int(0, 3))
                     length = 2;
                 let pos_1 = Vec.of(-20 + length, 5.1, 19);
                 let pos_2 = Vec.of(-20 + length, 5.1, 21);
                 this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, 0));
                 this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, 0));
-            } 
-            else
+            } else
                 this.game.object_list.push(new Wall(this.game, pos.plus(bot_wall_trans), 20, 0));
 
             if (this.rooms[i].doors[2]) {
+                let length = rand_num(5, 7);
                 if (rand_int(0, 3)) {
-                    let length = rand_num(5, 7);
                     let pos_1 = Vec.of(-19, 5.1, -18 + length);
                     let pos_2 = Vec.of(-21, 5.1, -18 + length);
                     this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, Math.PI / 2));
                     this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, Math.PI / 2));
                 }
-            } 
-            else
+            } else
                 this.game.object_list.push(new Wall(this.game, pos.plus(left_wall_trans), 18, Math.PI / 2));
 
             if (this.rooms[i].doors[3]) {
+                let length = rand_num(5, 7);
                 if (rand_int(0, 3)) {
-                    let length = rand_num(5, 7);
                     let pos_1 = Vec.of(19, 5.1, 18 - length);
                     let pos_2 = Vec.of(21, 5.1, 18 - length);
                     this.game.object_list.push(new Wall(this.game, pos.plus(pos_1), length, Math.PI / 2));
                     this.game.object_list.push(new Wall(this.game, pos.plus(pos_2), length, Math.PI / 2));
                 }
-            } 
-            else
+            } else
                 this.game.object_list.push(new Wall(this.game, pos.plus(right_wall_trans), 18, Math.PI / 2));
+            
+            // Create some environmental objects inside the room
+            // Mobs
+            if (rand_int(0, 3)) {
+                let num_mobs = rand_int(1, 4);
+                let x = rand_num(-10, 10);
+                let z = rand_num(-10, 10);
+                for (var i = 0; i < num_mobs; i++) {
+                    this.game.object_list.push(new Mob(this.game, pos.plus(Vec.of(x, 1.6, z))));
+                    let new_x = x;
+                    let new_z = z;
+                    while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5) {
+                        new_x = rand_num(-10, 10);
+                        new_z = rand_num(-10, 10);
+                    }
+                    x = new_x;
+                    z = new_z;
+                }
+            }
         }
     }
-
-
-
 }
 
 // Doors: [top, bot, left, right]

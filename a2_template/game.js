@@ -26,7 +26,7 @@ class Game extends Scene_Component // Main game engine
             origin: Mat4.identity(),
             Phong_Model: context.get_instance(Phong_Model),
             camera_angle: Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0)),
-            camera_location: Mat4.translation([0, -200, -10]),
+            camera_location: Mat4.translation([0, -100, 0]),
             view_mode: "Aerial"
         });
 
@@ -47,13 +47,11 @@ class Game extends Scene_Component // Main game engine
             this.player.v[2] = -2;
         }, undefined, function () {
             this.player.v[2] = 0;
-            this.player.v[2] = 0;
         });
 
         this.key_triggered_button("Move backward", "S", function () {
             this.player.v[2] = 2;
         }, undefined, function () {
-            this.player.v[2] = 0;
             this.player.v[2] = 0;
         });
 
@@ -61,13 +59,11 @@ class Game extends Scene_Component // Main game engine
             this.player.v[0] = -2;
         }, undefined, function () {
             this.player.v[0] = 0;
-            this.player.v[0] = 0;
         });
 
         this.key_triggered_button("Move right", "D", function () {
             this.player.v[0] = 2;
         }, undefined, function () {
-            this.player.v[0] = 0;
             this.player.v[0] = 0;
         });
 
@@ -84,9 +80,9 @@ class Game extends Scene_Component // Main game engine
             this.player.alpha = 0;
             this.player.omega = 0;
         });
-
+        
         this.key_triggered_button("Pew pew", "J", function () {
-            this.object_list.push(new Fire_Bolt(this, this.player));
+            this.object_list.push(new Nuke(this, this.player));
         }, undefined, function () {});
 
         this.key_triggered_button("Toggle aerial view", "K", function () {
@@ -96,7 +92,7 @@ class Game extends Scene_Component // Main game engine
                 this.view_mode = "Default";
             } else {
                 this.camera_angle = Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0));
-                this.camera_location = Mat4.translation([0, -200, -10]);
+                this.camera_location = Mat4.translation([0, -100, 0]);
                 this.view_mode = "Aerial";
             }
         });
@@ -123,7 +119,7 @@ class Game extends Scene_Component // Main game engine
 
         for (var i in this.object_list) {
             if (this.object_list[i].is_alive()) {
-                if (this.object_list[i].type == "moving")
+                if (this.object_list[i].type != "idle" && this.object_list[i].type != "player")
                     this.object_list[i].move(0.15);
                 this.object_list[i].draw(graphics_state);
             } else

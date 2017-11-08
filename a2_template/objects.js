@@ -14,6 +14,7 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
     }
 
     draw(graphics_state) {}
+    move(dt) {}
 }
 
 class Idle_Object extends Game_Object {

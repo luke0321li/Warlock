@@ -26,7 +26,7 @@ class Game extends Scene_Component // Main game engine
             origin: Mat4.identity(),
             Phong_Model: context.get_instance(Phong_Model),
             camera_angle: Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0)),
-            camera_location: Mat4.translation([0, -100, 0]),
+            camera_location: Mat4.translation([0, -200, 0]),
             view_mode: "Aerial"
         });
 
@@ -82,7 +82,7 @@ class Game extends Scene_Component // Main game engine
         });
         
         this.key_triggered_button("Pew pew", "J", function () {
-            this.object_list.push(new Nuke(this, this.player));
+            this.object_list.push(new Fire_Bolt(this, this.player));
         }, undefined, function () {});
 
         this.key_triggered_button("Toggle aerial view", "K", function () {
@@ -92,7 +92,7 @@ class Game extends Scene_Component // Main game engine
                 this.view_mode = "Default";
             } else {
                 this.camera_angle = Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0));
-                this.camera_location = Mat4.translation([0, -100, 0]);
+                this.camera_location = Mat4.translation([0, -200, 0]);
                 this.view_mode = "Aerial";
             }
         });
@@ -117,17 +117,23 @@ class Game extends Scene_Component // Main game engine
             // new Light(Vec.of(-10, -20, -14, 0), Color.of(1, 1, 3, 1), 100)
         ];
 
-        for (var i in this.object_list) {
-            if (this.object_list[i].is_alive()) {
-                if (this.object_list[i].type != "idle" && this.object_list[i].type != "player")
-                    this.object_list[i].move(0.15);
-                this.object_list[i].draw(graphics_state);
-            } else
-                this.object_list.splice(i, 1);
-        }
-
         this.player.move(0.15);
         this.update_camera(graphics_state);
         this.draw_player(graphics_state);
+        
+        for (var i in this.object_list) {
+            if (this.object_list[i].is_alive()) {
+                if (this.object_list[i].type != "player")
+                    this.object_list[i].move(0.15);
+                this.object_list[i].draw(graphics_state);
+            } 
+        }
+        
+        for (var i in this.object_list) {
+            if (!this.object_list[i].is_alive()) {
+                this.object_list.splice(i, 1);
+            } 
+        }
+        
     }
 }

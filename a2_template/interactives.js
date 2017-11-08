@@ -1,5 +1,4 @@
 // Definitions for base classes of moving objects
-
 class Moving_Object extends Game_Object {
     constructor(game, hp, collision_box, init_pos, init_a, init_v, init_alpha, init_omega, init_angle, v_cap) {
         super(game, hp, collision_box, init_pos, init_angle, "moving");
@@ -61,13 +60,10 @@ class Moving_Object extends Game_Object {
 }
 
 class Projectile extends Moving_Object {
-    constructor(game, source, collision_box, init_v, damage, diminish, num_particles, particle_size) {
+    constructor(game, source, collision_box, init_v, diminish) {
         super(game, 20, collision_box, source.pos, Vec.of(0, 0, 0), init_v, 0, 0, source.angle, 999);
-        this.damage = damage;
         this.diminish = diminish;
         this.type = "projectile";
-        this.num_particles = num_particles;
-        this.particle_size = particle_size;
     }
 
     move(dt) {
@@ -75,20 +71,13 @@ class Projectile extends Moving_Object {
         // Collision check, projectile deals damage and diminishes after hitting non-player objects
         this.pos = this.pos.plus(v_new.times(dt));
         if (this.pos[1] < (0.1 + this.collision_box[1])) {
-            this.hp = 0;
-            this.create_particles();
-            this.on_hit();
+            this.on_hit(0);
             return false;
         }
         let sides = [-1, 1];
         for (var i in this.game.object_list) {
             if ((this.game.object_list[i].type == "mob" || this.game.object_list[i].type == "idle") && this.collide_with(this.game.object_list[i])) {
-                this.hp = 0;
-                if (this.game.object_list[i].type == "mob") {
-                    this.game.object_list[i].hp -= this.damage;
-                }
-                this.create_particles();
-                this.on_hit();
+                this.on_hit(this.game.object_list[i]);
                 return false;
             }
         }
@@ -97,42 +86,71 @@ class Projectile extends Moving_Object {
         return true;
     }
 
-    create_particles() {
-        if (this.num_particles) {
-            for (var i = 0; i < this.num_particles; i++)
-                this.game.object_list.push(new Particle(this.game, this, this.particle_size));
+    create_particles(number, size) {
+        if (number) {
+            for (var i = 0; i < number; i++)
+                this.game.object_list.push(new Particle(this.game, this, size));
         }
     }
-    
+
     draw(graphics_state) {
         let mat = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
         this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(this.collision_box)), this.game.rand_1);
     }
-    
-    on_hit() {}
+
+    on_hit(target) {}
 }
 
 class Particle extends Projectile {
     constructor(game, source, size) {
-        super(game, source, Vec.of(size, size, size), Vec.of(rand_num(-3, 3), rand_num(-3, 3), rand_num(-5, 5)), 0, 2, 0, 0);
+        super(game, source, Vec.of(0, 0, 0), Vec.of(rand_num(-3, 3), rand_num(-3, 3), rand_num(-5, 5)), 2);
         this.angle += Math.PI / 2; // Bounces off;
         this.size = size;
+    }
+
+    on_hit(target) {
+        this.hp = 0;
+    }
+
+    draw(graphics_state) {
+        let mat = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
+        this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(Vec.of(this.size, this.size, this.size))), this.game.rand_1);
     }
 }
 
 class Fire_Bolt extends Projectile {
     constructor(game, source) {
-        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 10, 0.5, 7, 0.3);
+        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5);
         let fluctuation = rand_num(-1, 1);
         let cosine = Math.cos(source.angle);
         let sine = Math.sin(source.angle);
         this.pos = this.pos.plus(Vec.of(fluctuation * cosine, 0, -1 * fluctuation * sine));
     }
+
+    on_hit(target) {
+        this.create_particles(7, 0.25)
+        if (target) {
+            if (target.type == "mob") {
+                target.hp -= 15;
+            }
+            this.hp = 0;
+        }
+    }
 }
 
 class Nuke extends Projectile {
     constructor(game, source) {
-        super(game, source, Vec.of(0.7, 0.7, 0.7), Vec.of(0, 2, -3), 25, 0.25, 15, .3);
+        super(game, source, Vec.of(0.7, 0.7, 0.7), Vec.of(0, 2, -3), 0.25);
+    }
+
+    on_hit(target) {
+        this.create_particles(12, 0.4)
+        if (target) {
+            if (target.type == "mob") {
+                target.hp -= 40;
+            }
+            this.hp = 0;
+        }
     }
 }
 
@@ -174,8 +192,10 @@ class Mob extends Moving_Object {
     }
 
     draw(graphics_state) {
+        if (!this.is_alive())
+            console.log("WUtFace");
         let mob_matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
-        this.game.shapes.box.draw(graphics_state, mob_matrix.times(Mat4.scale(this.collision_box)), this.game.test);
+        this.game.shapes.box.draw(graphics_state, mob_matrix.times(Mat4.scale(Vec.of(0.6, 1.3, 0.6))), this.game.test);
     }
 
 }

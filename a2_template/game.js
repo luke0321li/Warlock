@@ -11,7 +11,8 @@ class Game extends Scene_Component // Main game engine
         var shapes = {
             'box': new Cube(),
             'ball': new Subdivision_Sphere(4),
-            'pillar_top': new Trapezoid_Prism(2.4, 1.6, 1)
+            'pillar_top': new Trapezoid_Prism(2.4, 1.6, 1),
+            'crate': new Crate_Shape()
         };
 
         this.submit_shapes(context, shapes);
@@ -90,7 +91,7 @@ class Game extends Scene_Component // Main game engine
         this.key_triggered_button("View map", "M", function () {
             if (this.view_mode == "Aerial") {
                 this.camera_angle = Mat4.rotation(.1, Vec.of(1, 0, 0));
-                this.camera_location = Mat4.translation([0, -4, -6]);
+                this.camera_location = Mat4.translation([0, -4, -15]);
                 this.view_mode = "Default";
             } else {
                 this.camera_angle = Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0));
@@ -129,10 +130,17 @@ class Game extends Scene_Component // Main game engine
             if (this.object_list[i].is_alive()) {
                 if (this.object_list[i].type != "player")
                     this.object_list[i].move(0.15);
-                this.object_list[i].draw(graphics_state);
+                let pos_vec = this.object_list[i].pos.minus(this.player.pos);
+                if (pos_vec.norm() <= 75) // To save energy, only draw objects within a certain radius of the player
+                {
+                    let player_front = rotate_vec(Vec.of(0, 0, -1), this.player.angle);
+                    if (this.view_mode == "Aerial" || pos_vec.normalized().dot(player_front) >= -0.5 || this.object_list[i].constructor.name == "Room_Base")
+                    {
+                        this.object_list[i].draw(graphics_state);
+                    }
+                }
             } 
         }
-        
         // Remove dead objects
         for (var i in this.object_list) {
             if (!this.object_list[i].is_alive()) {
@@ -140,6 +148,5 @@ class Game extends Scene_Component // Main game engine
                 this.object_list.splice(i, 1);
             } 
         }
-        console.log(this.object_list.length);
     }
 }

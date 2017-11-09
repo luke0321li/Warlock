@@ -37,7 +37,7 @@ class Wall extends Idle_Object {
     }
 }
 
-class Room_base extends Idle_Object {
+class Room_Base extends Idle_Object {
     constructor(game, init_pos) {
         super(game, Vec.of(0, 0, 0), init_pos, 0);
     }
@@ -55,7 +55,6 @@ class Pillar extends Idle_Object {
     }
 
     draw(graphics_state) {
-        // this.game.shapes.box.draw(graphics_state, this.matrix.times(Mat4.scale(this.collision_box)), this.game.arena_grey);
         let move_up = Mat4.translation(Vec.of(0, 1.4, 0));
         let small_section = Mat4.scale([0.8, 0.4, 0.8]);
         let large_section = Mat4.scale([1, 1, 1]);

@@ -97,7 +97,7 @@ class Arena {
             let pos = this.rooms[i].center;
             let size = Mat4.scale(this.rooms[i].size);
             // Create floor
-            this.game.object_list.push(new Room_base(this.game, pos));
+            this.game.object_list.push(new Room_Base(this.game, pos));
 
             // Create walls and boundaries if there should be any
 
@@ -175,7 +175,7 @@ class Arena {
             let x = rand_num(-10, 10);
             let z = rand_num(-10, 10);
             for (var i = 0; i < num_pillars; i++) {
-                this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1, z)), rand_int(3, 5), 0));
+                this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1.1, z)), rand_int(3, 5), 0));
                 let new_x = x;
                 let new_z = z;
                 while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 10) {
@@ -185,19 +185,21 @@ class Arena {
                 x = new_x;
                 z = new_z;
             }
-        }
+        } 
 
-        if (rand_int(0, 3)) {
-            let num_crates = rand_int(2, 6);
-            let x = rand_num(-10, 10);
-            let z = rand_num(-10, 10);
+        if (!rand_int(0, 4)) {
+            let num_crates = rand_int(2, 5);
+            let x = rand_num(-17, 17);
+            let z = rand_num(-17, 17);
             for (var i = 0; i < num_crates; i++) {
-                this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, 1.6, z)), rand_num(0.4, 0.7), rand_num(0, Math.PI)));
+                let crate_size = rand_num(0.4, 1.5);
+                this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, crate_size + 0.1, z)), crate_size, rand_num(0, Math.PI)));
+                
                 let new_x = x;
                 let new_z = z;
-                while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5) {
-                    new_x = rand_num(-10, 10);
-                    new_z = rand_num(-10, 10);
+                while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5 || (Math.abs(new_x) < 10 && Math.abs(new_z) < 10)) {
+                    new_x = rand_num(-17, 17);
+                    new_z = rand_num(-17, 17);
                 }
                 x = new_x;
                 z = new_z;

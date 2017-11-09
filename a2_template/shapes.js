@@ -32,3 +32,34 @@ class Trapezoid_Prism extends Shape {
         }
     }
 }
+
+class Crate_Shape extends Shape {
+    constructor() {
+        super();
+        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.scale(Vec.of(0.8, 0.8, 0.8)));
+        let sides = [-1, 1];
+        for (let i in sides) {      
+            let left_trans = Mat4.translation(Vec.of(-0.9, sides[i] * 0.9, 0));
+            let right_trans = Mat4.translation(Vec.of(0.9, sides[i] * 0.9, 0));
+            let top_trans = Mat4.translation(Vec.of(0, sides[i] * 0.9, -0.9));
+            let bot_trans = Mat4.translation(Vec.of(0, sides[i] * 0.9, 0.9));
+            
+            let left_scale = Mat4.scale(Vec.of(0.1, 0.1, 1));
+            let top_scale = Mat4.scale(Vec.of(0.8, 0.1, 0.1));
+            
+            
+            Cube.prototype.insert_transformed_copy_into(this, [], left_trans.times(left_scale));
+            Cube.prototype.insert_transformed_copy_into(this, [], right_trans.times(left_scale));
+            Cube.prototype.insert_transformed_copy_into(this, [], top_trans.times(top_scale));
+            Cube.prototype.insert_transformed_copy_into(this, [], bot_trans.times(top_scale));
+
+        }
+        
+        let side_trans = Mat4.translation(Vec.of(0.9, 0, 0.9));
+        for (let i = 0; i < 4; i++) {
+            let side_pos = Mat4.rotation(Math.PI / 2 * i, Vec.of(0, 1, 0)).times(side_trans);
+            Cube.prototype.insert_transformed_copy_into(this, [], side_pos.times(Mat4.scale(Vec.of(0.1, 0.8, 0.1))));
+        }
+               
+    }
+}

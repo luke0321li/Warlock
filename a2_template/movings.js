@@ -19,10 +19,8 @@ class Moving_Object extends Game_Object {
         this.v = this.v.plus(this.a.times(dt));
         if (this.v.norm() >= this.v_cap)
             this.v = this.v.normalized().times(this.v_cap);
-        let r_1 = Vec.of(Math.cos(this.angle), 0, Math.sin(this.angle));
-        let r_2 = Vec.of(-1 * Math.sin(this.angle), 0, Math.cos(this.angle));
-        let v_new = Vec.of(this.v.dot(r_1), this.v[1], this.v.dot(r_2));
         this.a = Vec.of(0, 0, 0);
+        let v_new = rotate_vec(this.v, this.angle);
         return v_new;
     }
 
@@ -50,10 +48,8 @@ class Moving_Object extends Game_Object {
         if (this === game_object)
             return false;
         let other_pos = game_object.pos;
-        let cosine = Math.cos(-1 * game_object.angle);
-        let sine = Math.sin(-1 * game_object.angle);
-        let cur_pos = [this.pos[0] * cosine + this.pos[2] * sine, this.pos[1], -1 * this.pos[0] * sine + this.pos[2] * cosine];
-        other_pos = [other_pos[0] * cosine + other_pos[2] * sine, other_pos[1], -1 * other_pos[0] * sine + other_pos[2] * cosine];
+        let cur_pos = rotate_vec(this.pos, -1 * game_object.angle);
+        other_pos = rotate_vec(other_pos, -1 * game_object.angle);
         let other_box = game_object.collision_box;
         let collide = true;
         for (let i = 0; i < 3; i++)
@@ -86,7 +82,8 @@ class Projectile extends Moving_Object {
         }
         let sides = [-1, 1];
         for (var i in this.game.object_list) {
-            if ((this.game.object_list[i].type == "mob" || this.game.object_list[i].type == "idle") && this.collide_with(this.game.object_list[i])) {
+            let type = this.game.object_list[i].type
+            if ((type == "mob" || type == "idle" || type == "destructable") && this.collide_with(this.game.object_list[i])) {
                 this.on_hit(this.game.object_list[i]);
                 return false;
             }
@@ -134,7 +131,7 @@ class Fire_Bolt extends Projectile {
     on_hit(target) {
         this.create_particles(7, 0.25, this.game.rand_1)
         if (target) {
-            if (target.type == "mob") {
+            if (target.type == "mob" || target.type == "destructable") {
                 target.hp -= 15;
             }
         }

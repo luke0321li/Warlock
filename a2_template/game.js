@@ -10,7 +10,8 @@ class Game extends Scene_Component // Main game engine
         super(context);
         var shapes = {
             'box': new Cube(),
-            'ball': new Subdivision_Sphere(4)
+            'ball': new Subdivision_Sphere(4),
+            'pillar_top': new Trapezoid_Prism(2.4, 1.6, 1)
         };
 
         this.submit_shapes(context, shapes);
@@ -34,6 +35,7 @@ class Game extends Scene_Component // Main game engine
             test: this.Phong_Model.material(Color.of(.8, .7, .6, 1), 1, 1, .2, 40),
             arena_grey: this.Phong_Model.material(Color.of(.335, .335, .347, 1), 1, 1, .2, 40),
             arena_dark: this.Phong_Model.material(Color.of(.208, .208, .208, 1), 1, 1, .2, 40),
+            brown: this.Phong_Model.material(Color.of(0.45, 0.33, 0.25, 1), 1, 1, .2, 40),
             rand_1: this.Phong_Model.material(Color.of(rand_num(.2, .9), rand_num(.2, .9), rand_num(.2, .9), 1), 1, 1, 1, 40)
         });
 
@@ -85,7 +87,7 @@ class Game extends Scene_Component // Main game engine
             this.object_list.push(new Fire_Bolt(this, this.player));
         }, undefined, function () {});
 
-        this.key_triggered_button("Toggle aerial view", "K", function () {
+        this.key_triggered_button("View map", "M", function () {
             if (this.view_mode == "Aerial") {
                 this.camera_angle = Mat4.rotation(.1, Vec.of(1, 0, 0));
                 this.camera_location = Mat4.translation([0, -4, -6]);

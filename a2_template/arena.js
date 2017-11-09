@@ -93,7 +93,6 @@ class Arena {
         let left_wall_trans = Vec.of(-19, 5.1, 0);
         let right_wall_trans = Vec.of(19, 5.1, 0);
 
-        let sides = [-19, 19];
         for (var i in this.rooms) {
             let pos = this.rooms[i].center;
             let size = Mat4.scale(this.rooms[i].size);
@@ -165,7 +164,45 @@ class Arena {
                     z = new_z;
                 }
             }
+
+            this.create_decorations(pos);
         }
+    }
+
+    create_decorations(pos) {
+        if (!rand_int(0, 3)) {
+            let num_pillars = rand_int(1, 4);
+            let x = rand_num(-10, 10);
+            let z = rand_num(-10, 10);
+            for (var i = 0; i < num_pillars; i++) {
+                this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1, z)), rand_int(3, 5), 0));
+                let new_x = x;
+                let new_z = z;
+                while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 10) {
+                    new_x = rand_num(-10, 10);
+                    new_z = rand_num(-10, 10);
+                }
+                x = new_x;
+                z = new_z;
+            }
+        }
+
+        if (rand_int(0, 3)) {
+            let num_crates = rand_int(2, 6);
+            let x = rand_num(-10, 10);
+            let z = rand_num(-10, 10);
+            for (var i = 0; i < num_crates; i++) {
+                this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, 1.6, z)), rand_num(0.4, 0.7), rand_num(0, Math.PI)));
+                let new_x = x;
+                let new_z = z;
+                while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5) {
+                    new_x = rand_num(-10, 10);
+                    new_z = rand_num(-10, 10);
+                }
+                x = new_x;
+                z = new_z;
+            }
+        } 
     }
 }
 

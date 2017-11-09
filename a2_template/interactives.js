@@ -10,7 +10,8 @@ class Moving_Object extends Game_Object {
         this.last_free_loc = init_pos;
     }
 
-    attempt_move(dt) {
+    attempt_move(dt) // Updates velocity, angular velocity and angle; returns the new velocity using explicit euler
+    {
         if (this.pos[1] > (0.11 + this.collision_box[1]))
             this.a = this.a.plus(Vec.of(0, -0.5, 0));
         this.omega = this.omega + (this.alpha * (dt));
@@ -25,7 +26,8 @@ class Moving_Object extends Game_Object {
         return v_new;
     }
 
-    move(dt) {
+    move(dt) // Updates position based on the result of attempt_move
+    {
         let v_new = this.attempt_move(dt);
         let old_pos = this.pos;
         this.pos = this.pos.plus(v_new.times(dt));
@@ -43,7 +45,8 @@ class Moving_Object extends Game_Object {
         return true;
     }
 
-    collide_with(game_object) {
+    collide_with(game_object) // Returns true if this collides with game_object
+    {
         if (this === game_object)
             return false;
         let other_pos = game_object.pos;
@@ -57,6 +60,15 @@ class Moving_Object extends Game_Object {
             collide &= (Math.abs(cur_pos[i] - other_pos[i]) < (this.collision_box[i] + other_box[i]));
         return collide;
     }
+
+    create_particles(number, size, color) {
+        if (number) {
+            for (var i = 0; i < number; i++)
+                this.game.object_list.push(new Particle(this.game, this, size, color));
+        }
+    }
+    
+    on_death() {} // Do something when it is dead
 }
 
 class Projectile extends Moving_Object {
@@ -86,26 +98,20 @@ class Projectile extends Moving_Object {
         return true;
     }
 
-    create_particles(number, size) {
-        if (number) {
-            for (var i = 0; i < number; i++)
-                this.game.object_list.push(new Particle(this.game, this, size));
-        }
-    }
-
     draw(graphics_state) {
         let mat = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
         this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(this.collision_box)), this.game.rand_1);
     }
 
-    on_hit(target) {}
+    on_hit(target) {} // Do something when the projectile collides with another object
 }
 
 class Particle extends Projectile {
-    constructor(game, source, size) {
+    constructor(game, source, size, color) {
         super(game, source, Vec.of(0, 0, 0), Vec.of(rand_num(-3, 3), rand_num(-3, 3), rand_num(-5, 5)), 2);
         this.angle += Math.PI / 2; // Bounces off;
         this.size = size;
+        this.color = color;
     }
 
     on_hit(target) {
@@ -114,7 +120,7 @@ class Particle extends Projectile {
 
     draw(graphics_state) {
         let mat = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
-        this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(Vec.of(this.size, this.size, this.size))), this.game.rand_1);
+        this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(Vec.of(this.size, this.size, this.size))), this.color);
     }
 }
 
@@ -128,13 +134,13 @@ class Fire_Bolt extends Projectile {
     }
 
     on_hit(target) {
-        this.create_particles(7, 0.25)
+        this.create_particles(7, 0.25, this.game.rand_1)
         if (target) {
             if (target.type == "mob") {
                 target.hp -= 15;
             }
-            this.hp = 0;
         }
+        this.hp = 0;
     }
 }
 
@@ -144,7 +150,7 @@ class Nuke extends Projectile {
     }
 
     on_hit(target) {
-        this.create_particles(12, 0.4)
+        this.create_particles(12, 0.4, this.game.rand_1)
         if (target) {
             if (target.type == "mob") {
                 target.hp -= 40;
@@ -196,6 +202,10 @@ class Mob extends Moving_Object {
             console.log("WUtFace");
         let mob_matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
         this.game.shapes.box.draw(graphics_state, mob_matrix.times(Mat4.scale(Vec.of(0.6, 1.3, 0.6))), this.game.test);
+    }
+
+    on_death() {
+        this.create_particles(5, 0.4, this.game.test);
     }
 
 }

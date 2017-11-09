@@ -117,10 +117,12 @@ class Game extends Scene_Component // Main game engine
             // new Light(Vec.of(-10, -20, -14, 0), Color.of(1, 1, 3, 1), 100)
         ];
 
+        // The player moves first
         this.player.move(0.15);
         this.update_camera(graphics_state);
         this.draw_player(graphics_state);
         
+        // Let every object take its turn to move
         for (var i in this.object_list) {
             if (this.object_list[i].is_alive()) {
                 if (this.object_list[i].type != "player")
@@ -129,11 +131,13 @@ class Game extends Scene_Component // Main game engine
             } 
         }
         
+        // Remove dead objects
         for (var i in this.object_list) {
             if (!this.object_list[i].is_alive()) {
+                this.object_list[i].on_death();
                 this.object_list.splice(i, 1);
             } 
         }
-        
+        console.log(this.object_list.length);
     }
 }

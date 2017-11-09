@@ -23,7 +23,8 @@ class Arena {
         this.configure_rooms();
     }
 
-    create_empty_map() {
+    create_empty_map() // Create an empty tile map
+    {
         this.cur_rooms = 0;
         this.map = new Array(this.map_size);
         for (let i = 0; i < this.map_size; i++) {
@@ -33,7 +34,8 @@ class Arena {
         }
     }
 
-    create_map(x, z) {
+    create_map(x, z) // Use flood fill to recursively create rooms on the tile map
+    {
         if (this.cur_rooms < this.max_rooms && !this.map[x][z]) {
             var num_neighbors = 0;
             if (x + 1 < this.map_size && this.map[x + 1][z])
@@ -62,7 +64,8 @@ class Arena {
         }
     }
 
-    make_rooms() {
+    make_rooms() // Create room objects according to the tile map. Add doors between adjacent rooms
+    {
         for (let i = 0; i < this.map_size; i++) {
             for (let j = 0; j < this.map_size; j++) {
                 if (this.map[i][j]) {
@@ -83,7 +86,8 @@ class Arena {
         }
     }
 
-    configure_rooms() {
+    configure_rooms() // For each room create floor, walls, and interior objects; also spawns mobs
+    {
         let top_wall_trans = Vec.of(0, 5.1, -19);
         let bot_wall_trans = Vec.of(0, 5.1, 19);
         let left_wall_trans = Vec.of(-19, 5.1, 0);
@@ -142,7 +146,7 @@ class Arena {
                 }
             } else
                 this.game.object_list.push(new Wall(this.game, pos.plus(right_wall_trans), 18, Math.PI / 2));
-            
+
             // Create some environmental objects inside the room
             // Mobs
             if (rand_int(0, 3)) {

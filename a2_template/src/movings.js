@@ -129,7 +129,7 @@ class Fire_Bolt extends Projectile {
     }
 
     on_hit(target) {
-        this.create_particles(7, 0.25, this.game.rand_1)
+        this.create_particles(5, 0.25, this.game.rand_1)
         if (target) {
             if (target.type == "mob" || target.type == "destructable") {
                 target.hp -= 15;

@@ -9,8 +9,5 @@ function rand_int(min, max) {
 }
 
 function rotate_vec(vec, angle) {
-    let r_1 = Vec.of(Math.cos(angle), 0, Math.sin(angle));
-    let r_2 = Vec.of(-1 * Math.sin(angle), 0, Math.cos(angle));
-    let v_new = Vec.of(vec.dot(r_1), vec[1], vec.dot(r_2));
-    return v_new;
+    return Vec.of(vec[0] * Math.cos(angle) + vec[2] * Math.sin(angle), vec[1], vec[0] * -1 * Math.sin(angle) + vec[2] *  Math.cos(angle));
 }

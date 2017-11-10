@@ -83,7 +83,7 @@ class Game extends Scene_Component // Main game engine
             this.player.alpha = 0;
             this.player.omega = 0;
         });
-        
+
         this.key_triggered_button("Pew pew", "J", function () {
             this.object_list.push(new Fire_Bolt(this, this.player));
         }, undefined, function () {});
@@ -124,29 +124,29 @@ class Game extends Scene_Component // Main game engine
         this.player.move(0.15);
         this.update_camera(graphics_state);
         this.draw_player(graphics_state);
-        
+
         // Let every object take its turn to move
         for (var i in this.object_list) {
             if (this.object_list[i].is_alive()) {
-                if (this.object_list[i].type != "player")
-                    this.object_list[i].move(0.15);
                 let pos_vec = this.object_list[i].pos.minus(this.player.pos);
-                if (pos_vec.norm() <= 75) // To save energy, only draw objects within a certain radius of the player
+                let type = this.object_list[i].type;
+                if (type != "player" && type != "idle" && type != "destructable")
+                    this.object_list[i].move(0.15);
+                if (pos_vec.norm() <= 200) // To save energy, only draw and animate objects within a certain radius of the player
                 {
-                    let player_front = rotate_vec(Vec.of(0, 0, -1), this.player.angle);
-                    if (this.view_mode == "Aerial" || pos_vec.normalized().dot(player_front) >= -0.5 || this.object_list[i].constructor.name == "Room_Base")
-                    {
+                    let player_front = rotate_vec([0, 0, -1], this.player.angle);
+                    if (this.view_mode == "Aerial" || pos_vec.normalized().dot(player_front) >= -0.5 || this.object_list[i].constructor.name == "Room_Base") {
                         this.object_list[i].draw(graphics_state);
                     }
                 }
-            } 
+            }
         }
         // Remove dead objects
         for (var i in this.object_list) {
             if (!this.object_list[i].is_alive()) {
                 this.object_list[i].on_death();
                 this.object_list.splice(i, 1);
-            } 
+            }
         }
     }
 }

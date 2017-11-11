@@ -1,15 +1,15 @@
 class Arena {
-    constructor(game, num_rooms, map_size, room_size, room_thickness) {
-        this.game = game;
-        this.max_rooms = num_rooms;
-        this.map_size = map_size;
-        this.room_size = room_size;
-        this.room_thickness = room_thickness;
-        this.map = [];
-        this.rooms = [];
-        this.init_x = Math.floor(this.map_size / 2);
-        this.init_z = this.init_x;
-        this.cur_rooms = 0;
+    constructor(game, num_rooms, map_size) {
+        Object.assign(this, {
+            game: game,
+            max_rooms: num_rooms,
+            map_size: map_size,
+            map: [],
+            rooms: [],
+            init_x: Math.floor(map_size / 2),
+            init_z: Math.floor(map_size / 2),
+            cur_rooms: 0
+        })
 
         this.create_empty_map();
         this.create_map(this.init_x, this.init_z);
@@ -78,9 +78,9 @@ class Arena {
                         doors[0] = 1;
                     if (j < this.map_size - 1 && this.map[i][j + 1])
                         doors[1] = 1;
-                    let x = (i - this.init_x) * this.room_size * 2;
-                    let z = (j - this.init_z) * this.room_size * 2;
-                    this.rooms.push(new Square_Room(x, this.room_thickness, z, this.room_size, doors));
+                    let x = (i - this.init_x) * 20 * 2;
+                    let z = (j - this.init_z) * 20 * 2;
+                    this.rooms.push(new Square_Room(x, .1, z, 20, doors));
                 }
             }
         }
@@ -148,24 +148,11 @@ class Arena {
 
             // Create some environmental objects inside the room
             // Mobs
-            if (rand_int(0, 3)) {
-                let num_mobs = rand_int(1, 4);
-                let x = rand_num(-10, 10);
-                let z = rand_num(-10, 10);
-                for (var i = 0; i < num_mobs; i++) {
-                    this.game.object_list.push(new Mob(this.game, pos.plus(Vec.of(x, 1.6, z))));
-                    let new_x = x;
-                    let new_z = z;
-                    while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5) {
-                        new_x = rand_num(-10, 10);
-                        new_z = rand_num(-10, 10);
-                    }
-                    x = new_x;
-                    z = new_z;
-                }
+            if (this.rooms[i].center[0] || this.rooms[i].center[2]) {
+                this.create_decorations(pos);
+                this.spawn_mobs(pos);
             }
 
-            this.create_decorations(pos);
         }
     }
 
@@ -175,7 +162,7 @@ class Arena {
             let x = rand_num(-10, 10);
             let z = rand_num(-10, 10);
             for (var i = 0; i < num_pillars; i++) {
-                this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1.1, z)), rand_int(3, 5), 0));
+                this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1.1, z)), rand_int(3, 5)));
                 let new_x = x;
                 let new_z = z;
                 while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 10) {
@@ -185,16 +172,16 @@ class Arena {
                 x = new_x;
                 z = new_z;
             }
-        } 
+        }
 
         if (!rand_int(0, 4)) {
             let num_crates = rand_int(2, 5);
             let x = rand_num(-17, 17);
             let z = rand_num(-17, 17);
             for (var i = 0; i < num_crates; i++) {
-                let crate_size = rand_num(0.4, 1.5);
+                let crate_size = rand_num(0.8, 1.5);
                 this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, crate_size + 0.1, z)), crate_size, rand_num(0, Math.PI)));
-                
+
                 let new_x = x;
                 let new_z = z;
                 while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5 || (Math.abs(new_x) < 10 && Math.abs(new_z) < 10)) {
@@ -204,7 +191,26 @@ class Arena {
                 x = new_x;
                 z = new_z;
             }
-        } 
+        }
+    }
+
+    spawn_mobs(pos) {
+        if (rand_int(0, 3)) {
+            let num_mobs = rand_int(1, 4);
+            let x = rand_num(-10, 10);
+            let z = rand_num(-10, 10);
+            for (var i = 0; i < num_mobs; i++) {
+                this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 1.6, z))));
+                let new_x = x;
+                let new_z = z;
+                while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5) {
+                    new_x = rand_num(-10, 10);
+                    new_z = rand_num(-10, 10);
+                }
+                x = new_x;
+                z = new_z;
+            }
+        }
     }
 }
 

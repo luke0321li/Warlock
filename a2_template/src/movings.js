@@ -2,12 +2,14 @@
 class Moving_Object extends Game_Object {
     constructor(game, hp, collision_box, init_pos, init_a, init_v, init_alpha, init_omega, init_angle, v_cap) {
         super(game, hp, collision_box, init_pos, init_angle, "moving");
-        this.a = init_a;
-        this.v = init_v;
-        this.alpha = init_alpha;
-        this.omega = init_omega;
-        this.v_cap = v_cap;
-        this.last_free_loc = init_pos;
+        Object.assign(this, {
+            a: init_a,
+            v: init_v,
+            alpha: init_alpha,
+            omega: init_omega,
+            v_cap: v_cap,
+            last_free_loc: init_pos
+        })
     }
 
     attempt_move(dt) // Updates velocity, angular velocity and angle; returns the new velocity using explicit euler
@@ -55,13 +57,6 @@ class Moving_Object extends Game_Object {
         for (let i = 0; i < 3; i++)
             collide &= (Math.abs(cur_pos[i] - other_pos[i]) < (this.collision_box[i] + other_box[i]));
         return collide;
-    }
-
-    create_particles(number, size, color) {
-        if (number) {
-            for (var i = 0; i < number; i++)
-                this.game.object_list.push(new Particle(this.game, this, size, color));
-        }
     }
 }
 
@@ -132,7 +127,7 @@ class Fire_Bolt extends Projectile {
         this.create_particles(5, 0.25, this.game.rand_1)
         if (target) {
             if (target.type == "mob" || target.type == "destructable") {
-                target.hp -= 15;
+                target.take_damage(15);
             }
         }
         this.hp = 0;
@@ -154,52 +149,3 @@ class Fire_Bolt extends Projectile {
         }
     }
 } */
-
-class Player extends Moving_Object {
-    constructor(game) {
-        super(game, 100, Vec.of(1, 1.7, 1), Vec.of(0, 1.8, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 0), 0, 0, 0, 5);
-        this.type = "player";
-    }
-
-    draw(graphics_state) {
-        let player_matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
-        this.game.shapes.box.draw(graphics_state, player_matrix.times(Mat4.scale([1, 1.7, 1])), this.game.rand_1);
-    }
-}
-
-class Mob extends Moving_Object {
-    constructor(game, init_pos) {
-        super(game, 50, Vec.of(0.8, 1.5, 0.8), init_pos, Vec.of(0, 0, 0), Vec.of(1, 0, 0), 0, 0, rand_num(0, Math.PI * 2), 3);
-        this.type = "mob";
-        this.distance_counter = 0;
-        this.attempted_distance = rand_num(1, 10);
-    }
-
-    move(dt) {
-        let old_pos = this.pos;
-        if (super.move(dt)) {
-            this.distance_counter += this.pos.minus(old_pos).norm();
-            if (this.distance_counter >= this.attempted_distance) {
-                this.angle = rand_num(0, Math.PI * 2);
-                this.attempted_distance = rand_num(1, 10);
-                this.distance_counter = 0;
-            }
-        } else {
-            this.angle += Math.PI / 2;
-            return false;
-        }
-
-        return true;
-    }
-
-    draw(graphics_state) {
-        if (!this.is_alive())
-            console.log("WUtFace");
-        let mob_matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
-        this.game.shapes.box.draw(graphics_state, mob_matrix.times(Mat4.scale(Vec.of(0.6, 1.3, 0.6))), this.game.test);
-    }
-
-    on_death() {
-        this.create_particles(5, 0.6, this.game.test);
-    }
-}

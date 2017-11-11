@@ -10,8 +10,12 @@ class Crate extends Destructable {
         super(game, 35, Vec.of(1, 1, 1).times(size), init_pos, init_angle);
         this.size = size;
     }
-    
+
     draw(graphics_state) {
         this.game.shapes.crate.draw(graphics_state, this.matrix.times(Mat4.scale(Vec.of(1, 1, 1).times(this.size))), this.game.brown);
+    }
+    
+    on_death() {
+        this.create_particles(3, this.size * 0.5, this.game.brown);
     }
 }

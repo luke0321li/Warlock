@@ -151,15 +151,15 @@ class Mat4 extends Mat // Special 4x4 matrices that are useful for graphics.
         return Mat.of([1, 0, 0, t[0]], // Requires a 3x1 Vec.
                                            [0, 1, 0, t[1]], [0, 0, 1, t[2]], [0, 0, 0, 1]); // Note:  look_at() assumes the result will used for a camera and stores its result in
     } //     inverse space.  You can also use it to point the basis of any *object* towards 
+    // Note:  look_at() assumes the result will used for a camera and stores its result in
+    //     inverse space.  You can also use it to point the basis of any *object* towards 
     static look_at(eye, at, up) {
-        var v = at.minus(eye).normalized(), //     anything but you must re-invert it first.  Each input must be 3x1 Vec.
-            n = v.minus(up).normalized(); // ( v is the view-direction vector )
-        if (n[0] != n[0]) throw "Two parallel vectors were given";
-        var u = n.cross(v).normalized().times(-1); // ( u is the orthogonalized up vector )
-
-        return Mat.of(n.to4(-n.dot(eye)),
-            u.to4(-u.dot(eye)),
-            v.to4(-v.dot(eye)), [0, 0, 0, 1]);
+        let z = at.minus(eye).normalized(), //     anything but you must re-invert it first.  Each input must be 3x1 Vec.
+            x = z.cross(up).normalized(), //  Compute vectors along the requested coordinate axes.
+            y = x.cross(z).normalized(); //  (y is the "updated" and orthogonalized local y axis.)
+        if (!x.every(i => i == i)) throw "Two parallel vectors were given"; // Check for NaN, indicating a degenerate cross product, which
+        z.scale(-1); // happens if eye == at, or if at minus eye is parallel to up.
+        return Mat4.translation([-x.dot(eye), -y.dot(eye), -z.dot(eye)]).times(Mat.of(x.to4(0), y.to4(0), z.to4(0), Vec.of(0, 0, 0, 1)));
     }
     static orthographic(left, right, bottom, top, near, far) // Box-shaped view volume for projection.
     {

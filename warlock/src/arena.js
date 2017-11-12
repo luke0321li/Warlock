@@ -200,7 +200,15 @@ class Arena {
             let x = rand_num(-10, 10);
             let z = rand_num(-10, 10);
             for (var i = 0; i < num_mobs; i++) {
-                this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 1.6, z))));
+                if (rand_int(0, 5))
+                    this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 0, z))));
+                else if (this.game.level > 1)
+                {
+                    if (!rand_int(0, 3))
+                        this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0, z))));
+                    else
+                        this.game.object_list.push(new Draugr(this.game, pos.plus(Vec.of(x, 0, z))));
+                }
                 let new_x = x;
                 let new_z = z;
                 while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5) {

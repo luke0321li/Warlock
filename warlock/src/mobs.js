@@ -1,8 +1,8 @@
 // States: "roaming", "aggro", "rest", "turn"
 
 class Mob extends Moving_Object {
-    constructor(game, hp, collision_box, init_pos, roam_speed, aggro_speed, vision, attack_dmg, attack_rate, difficulty) {
-        super(game, hp, collision_box, init_pos, Vec.of(0, 0, 0), Vec.of(roam_speed, 0, 0), 0, 0, rand_num(0, Math.PI * 2), aggro_speed);
+    constructor(game, hp, collision_box, init_pos, roam_speed, aggro_speed, vision, attack_range, attack_dmg, attack_rate, difficulty) {
+        super(game, hp, collision_box, Vec.of(init_pos[0], .1 + collision_box[1], init_pos[2]), Vec.of(0, 0, 0), Vec.of(roam_speed, 0, 0), 0, 0, rand_num(0, Math.PI * 2), aggro_speed);
         Object.assign(this, {
             type: "mob",
             roam_speed: roam_speed,
@@ -11,9 +11,10 @@ class Mob extends Moving_Object {
             attempted_distance: rand_num(1, 10),
             rest_counter: 0,
             state: "roaming",
+            attack_range: attack_range,
             attack_dmg: attack_dmg,
             attack_rate: attack_rate,
-            attack_counter: attack_rate,
+            attack_counter: 0,
             difficulty: difficulty
         })
         this.game.mob_count += 1;
@@ -40,7 +41,7 @@ class Mob extends Moving_Object {
                 this.state = "aggro";
         } else if (this.state == "aggro") // Runs at player and attacks 
         {
-            if (player_pos.norm() < 2) {
+            if (player_pos.norm() < this.attack_range) {
                 if (!this.attack_counter) {
                     this.game.player.take_damage(this.attack_dmg)
                     this.attack_counter = this.attack_rate;
@@ -88,11 +89,15 @@ class Mob extends Moving_Object {
             this.game.shapes.aggro.draw(graphics_state, matrix.times(Mat4.scale(Vec.of(0.3, 0.5, 0))), this.game.aggro_red);
         }
     }
+
+    on_death() {
+        this.game.mob_count -= 1;
+    }
 }
 
 class Goblin extends Mob {
     constructor(game, init_pos) {
-        super(game, 50, Vec.of(0.8, 1.5, 0.8), init_pos, 2, 5, 35, 10, 35, 1);
+        super(game, 50, Vec.of(0.8, 1.5, 0.8), init_pos, 2, 5, 45, 2, 10, 25, 1);
     }
 
     draw(graphics_state) {
@@ -100,9 +105,61 @@ class Goblin extends Mob {
         let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
         this.game.shapes.box.draw(graphics_state, matrix, this.game.goblin_green);
     }
-    
-    on_death () {
+
+    on_death() {
+        super.on_death();
         this.create_particles(4, 0.8, this.game.goblin_green);
-        this.game.mob_count -= 1;
+    }
+}
+
+class Ogre extends Mob {
+    constructor(game, init_pos) {
+        super(game, 200, Vec.of(2, 3, 2), init_pos, 1, 4, 35, 4, 30, 50, 3);
+    }
+
+    draw(graphics_state) {
+        super.draw(graphics_state);
+        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
+        this.game.shapes.box.draw(graphics_state, matrix, this.game.ogre_green);
+    }
+
+    on_death() {
+        super.on_death();
+        this.create_particles(4, 1.2, this.game.ogre_green);
+    }
+}
+
+class Draugr extends Mob {
+    constructor(game, init_pos) {
+        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 3, 6, 80, 3, 15, 15, 2);
+    }
+    
+    draw(graphics_state) {
+        super.draw(graphics_state);
+        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
+        this.game.shapes.box.draw(graphics_state, matrix, this.game.draugr_grey);
+    }
+    
+    on_death() {
+        super.on_death();
+        this.create_particles(3, 0.8, this.game.draugr_grey);
+        this.game.object_list.push(new Ghost(this.game, this.pos));
+    }
+}
+
+class Ghost extends Mob {
+    constructor(game, init_pos) {
+        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 1, 2, 40, 3, 10, 30, 2);
+    }
+    
+    draw(graphics_state) {
+        super.draw(graphics_state);
+        let matrix = Mat4.translation(this.pos.plus(Vec.of(0, 1.1, 0))).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
+        this.game.shapes.box.draw(graphics_state, matrix, this.game.ghost_grey);
+    }
+    
+    on_death() {
+        super.on_death();
+        this.create_particles(3, 0.8, this.game.ghost_grey);
     }
 }

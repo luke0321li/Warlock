@@ -127,7 +127,7 @@ class Fire_Bolt extends Projectile {
         this.create_particles(5, 0.25, this.game.rand_1)
         if (target) {
             if (target.type == "mob" || target.type == "destructable") {
-                target.take_damage(15);
+                target.take_damage(322);
             }
         }
         this.hp = 0;

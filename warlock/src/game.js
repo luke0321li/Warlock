@@ -9,6 +9,7 @@ class Game extends Scene_Component // Main game engine
     constructor(context) {
         super(context);
         var shapes = {
+            'banner': new Square(),
             'box': new Cube(),
             'ball': new Subdivision_Sphere(4),
             'pillar_3': new Pillar_Shape(3),
@@ -40,14 +41,21 @@ class Game extends Scene_Component // Main game engine
             arena_dark: this.Phong_Model.material(Color.of(.208, .208, .208, 1), 1, 1, .2, 40),
             brown: this.Phong_Model.material(Color.of(0.45, 0.33, 0.25, 1), 1, 1, .2, 40),
             goblin_green: this.Phong_Model.material(Color.of(0.33, 0.45, 0.25, 1), 1, 1, .2, 40),
+            ogre_green: this.Phong_Model.material(Color.of(0.40, 0.46, 0.20, 1), 1, 1, .2, 40),
+            draugr_grey: this.Phong_Model.material(Color.of(0.4, 0.4, 0.4, 1), 1, 1, .2, 40),
+            ghost_grey: this.Phong_Model.material(Color.of(0.4, 0.4, 0.4, 0.6), 1, 1, .2, 40),
             aggro_red: this.Phong_Model.material(Color.of(0.65, 0.3, 0.3, 0.9), 1, 1, .2, 40),
             rand_1: this.Phong_Model.material(Color.of(rand_num(.2, .9), rand_num(.2, .9), rand_num(.2, .9), 1), 1, 1, 1, 40),
-            damaged: this.Phong_Model.material(Color.of(0.75, 0.4, 0.4, 1), 1, 1, .2, 40)
+            damaged: this.Phong_Model.material(Color.of(0.75, 0.4, 0.4, 1), 1, 1, .2, 40),
+            white: this.Phong_Model.material(Color.of(.9, .9, .9, 1), 1, 1, .2, 40),
+            dead_banner: this.Phong_Model.material(Color.of(0, 0, 0, 1), 1, 0, 0, 40, context.get_instance("assets/Endgame.png")),
+            next_banner: this.Phong_Model.material(Color.of(0, 0, 0, 1), 1, 0, 0, 40, context.get_instance("assets/Nextlevel.png"))
         });
 
+        this.level = 1;
         this.mob_count = 0;
-        this.map_size = 15;
-        this.arena = new Arena(this, 15, 15);
+        this.map_size = 10;
+        this.arena = new Arena(this, this.map_size, this.map_size);
         this.make_buttons();
         this.state = "play";
     }
@@ -107,6 +115,11 @@ class Game extends Scene_Component // Main game engine
                 this.view_mode = "Aerial";
             }
         });
+
+        this.key_triggered_button("Retry", "F", function () {
+            if (this.state == "dead" || this.state == "win")
+                this.state = "main";
+        }, undefined, function () {});
     }
 
     new_map() {
@@ -128,11 +141,22 @@ class Game extends Scene_Component // Main game engine
 
     draw_hp_bar(graphics_state) {
         if (this.view_mode == "Default") {
-            let hp = this.player.hp * 3.5 / 100
+            let hp = this.player.hp * 3.5 / this.player.max_health;
             let matrix = Mat4.translation(this.player.pos).times(Mat4.rotation(this.player.angle, Vec.of(0, 1, 0)));
             matrix = matrix.times(Mat4.translation(Vec.of(0, 6.5, -1)));
             this.shapes.box.draw(graphics_state, matrix.times(Mat4.scale(Vec.of(hp, 0.1, 0.1))), this.rand_1);
+            this.shapes.box.draw(graphics_state, matrix.times(Mat4.scale(Vec.of(3.5, 0.1, 0.1))), this.white);
+
         }
+    }
+
+    draw_end_panel(graphics_state) {
+        let matrix = Mat4.translation(this.player.pos).times(Mat4.rotation(this.player.angle, Vec.of(0, 1, 0)));
+        matrix = matrix.times(Mat4.translation(Vec.of(0, 3, 0))).times(Mat4.rotation(-0.08, Vec.of(1, 0, 0)));
+        if (this.state == "dead")
+            this.shapes.banner.draw(graphics_state, matrix.times(Mat4.scale(Vec.of(3.5, 3.5, 0))), this.dead_banner);
+        else if (this.state == "win")
+            this.shapes.banner.draw(graphics_state, matrix.times(Mat4.scale(Vec.of(3.5, 3.5, 0))), this.next_banner);            
     }
 
     display(graphics_state) // Draw everything in the game!
@@ -141,13 +165,18 @@ class Game extends Scene_Component // Main game engine
         {
             if (this.player.is_alive())
                 this.map_size += 4;
+            this.level += 1;
             this.new_map();
             this.state = "play";
-        } 
-        
+        }
+
+        else if (this.state == "dead")
+            this.draw_end_panel(graphics_state);
+        else if (this.state == "win")
+            this.draw_end_panel(graphics_state);
+
         else if (this.state == "play") // Currently in playthrough
         {
-            let t = graphics_state.animation_time / 1000;
             graphics_state.lights = [
             new Light(Vec.of(this.player.pos[0], 100, this.player.pos[2], 1), Color.of(1, 1, 1, 1), 100000), // Lights for Phong_Shader to use*/
         ];
@@ -168,10 +197,12 @@ class Game extends Scene_Component // Main game engine
                     if (pos_vec.norm() <= 200) // To save energy, only draw and animate objects within a certain radius of the player
                     {
                         if (type != "player" && type != "idle" && type != "destructable" && this.view_mode != "Aerial")
-                            this.object_list[i].move(0.15);
-                        if (pos_vec.norm() <= 100) {
+                            this.object_list[i].move(graphics_state.animation_delta_time * 0.01);
+                        if (this.view_mode == "Aerial")
+                            this.object_list[i].draw(graphics_state);
+                        else if (pos_vec.norm() <= 100) {
                             let player_front = rotate_vec([0, 0, -1], this.player.angle);
-                            if (this.view_mode == "Aerial" || pos_vec.normalized().dot(player_front) >= -0.5 || this.object_list[i].constructor.name == "Room_Base") {
+                            if (pos_vec.normalized().dot(player_front) >= -0.5 || this.object_list[i].constructor.name == "Room_Base") {
                                 this.object_list[i].draw(graphics_state);
                             }
                         }
@@ -186,8 +217,11 @@ class Game extends Scene_Component // Main game engine
                 }
             }
 
-            if (!this.player.is_alive() || !this.mob_count)
-                this.state = "main";
+            if (!this.player.is_alive())
+                this.state = "dead";
+            
+            else if (!this.mob_count)
+                this.state = "win";
         }
 
     }

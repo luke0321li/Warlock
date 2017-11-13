@@ -1,12 +1,12 @@
 class Player extends Moving_Object {
     constructor(game) {
-        super(game, 9999, Vec.of(1, 1.7, 1), Vec.of(0, 1.8, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 0), 0, 0, 0, 5);
+        super(game, 200, Vec.of(1, 1.7, 1), Vec.of(0, 1.8, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 0), 0, 0, 0, 5);
         this.type = "player";
         this.weapon = "Fire_Bolt";
         this.is_firing = false;
         this.is_damaged = false;
         this.damage_counter = 0;
-        this.max_health = 9999;
+        this.max_health = 200;
     }
 
     take_damage(num) {

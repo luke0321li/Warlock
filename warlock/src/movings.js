@@ -61,10 +61,11 @@ class Moving_Object extends Game_Object {
 }
 
 class Projectile extends Moving_Object {
-    constructor(game, source, collision_box, init_v, diminish) {
+    constructor(game, source, collision_box, init_v, diminish, color) {
         super(game, 20, collision_box, source.pos, Vec.of(0, 0, 0), init_v, 0, 0, source.angle, 999);
         this.diminish = diminish;
         this.type = "projectile";
+        this.color = color;
     }
 
     move(dt) {
@@ -90,7 +91,7 @@ class Projectile extends Moving_Object {
 
     draw(graphics_state) {
         let mat = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
-        this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(this.collision_box)), this.game.rand_1);
+        this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(this.collision_box)), this.color);
     }
 
     on_hit(target) {} // Do something when the projectile collides with another object
@@ -116,7 +117,7 @@ class Particle extends Projectile {
 
 class Fire_Bolt extends Projectile {
     constructor(game, source) {
-        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5);
+        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5, game.rand_1);
         let fluctuation = rand_num(-1, 1);
         let cosine = Math.cos(source.angle);
         let sine = Math.sin(source.angle);
@@ -134,18 +135,18 @@ class Fire_Bolt extends Projectile {
     }
 }
 
-/* class Nuke extends Projectile {
+class Nuke extends Projectile {
     constructor(game, source) {
-        super(game, source, Vec.of(0.7, 0.7, 0.7), Vec.of(0, 2, -3), 0.25);
+        super(game, source, Vec.of(0.8, 0.8, 0.8), Vec.of(0, 1, -12), 0.25, game.bright);
     }
 
     on_hit(target) {
-        this.create_particles(12, 0.4, this.game.rand_1)
+        this.create_particles(8, 0.4, this.game.bright)
         if (target) {
-            if (target.type == "mob") {
-                target.hp -= 40;
+            if (target.type == "mob" || target.type == "destructable") {
+                target.take_damage(45);
             }
             this.hp = 0;
         }
     }
-} */
+}

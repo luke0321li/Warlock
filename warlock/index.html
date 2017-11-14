@@ -23,7 +23,7 @@
         {
             window.contexts = {}; // A global variable, "contexts".  Browsers support up to 16 WebGL contexts per page.
 
-            const scenes = ["Game", "Global_Info_Table"]; // Register some scenes to the "Canvas_Manager" object -- which WebGL calls
+            const scenes = ["Game"]; // Register some scenes to the "Canvas_Manager" object -- which WebGL calls
             // upon every time a draw / keyboard / mouse event happens.  
 
             if (eval("typeof " + scenes[0]) !== "undefined") {
@@ -32,48 +32,10 @@
                     width: 1080,
                     height: 800
                 }));
-                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.8, .8, .8, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
+                contexts["main_canvas"] = new Canvas_Manager("main_canvas", Color.of(.15, .15, .15, 1), scenes); // Manage the WebGL canvas.  Second parameter sets background color.
                 for (let c in contexts) contexts[c].render(); // Call render() for each WebGL context on this page.  Then render() will re-queue itself for more calls.
 
-                Code_Manager.display_code(eval(scenes[0])); // Display the code for our demo on the page, starting with the first scene in the list.
-                for (let list of [core_dependencies, all_dependencies])
-                    document.querySelector("#class_list").rows[2].appendChild(Object.assign(document.createElement("td"), {
-                        innerHTML: list.reduce((acc, x) => acc += "<a href='javascript:void(0);' onclick='Code_Manager.display_code(" + x + ")'>" + x + "</a><br>", "")
-                    }));
-                document.getElementsByName("main_demo_link")[0].innerHTML = "<a href='javascript:void(0);' onclick='Code_Manager.display_code(" + scenes[0] + ")'>" + scenes[0] + "</a><br>";
-                document.querySelector("#code_display").innerHTML = "Below is the code for the demo that's running:<br>&nbsp;<br>" + document.querySelector("#code_display").innerHTML;
             }
-
-            document.querySelector("#edit_button").addEventListener('click', () => {
-                code_panel.style.display = class_list.style.display = 'none';
-                new_demo_source_code.style.display = 'block';
-                document.getElementsByName('new_demo_code')[0].value = code_display.dataset.displayed.toString()
-            })
-            const form = document.forms.namedItem("new_demo_source_code");
-            form.addEventListener('submit', function(event) {
-                if (document.getElementsByName("finished")[0].checked)
-                    alert("Your demo will be submitted.  If approved, you will start being asked for a password to make any further updates to it.  This password " +
-                        "will appear right now, below the submit button, and then (assuming submission worked) it will never appear again.  Write it down.");
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "/submit-demo?Unapproved", true);
-                xhr.responseType = "json";
-                xhr.onload = function(event) {
-                    if (xhr.status != 200) {
-                        document.querySelector("#submit_result").textContent = "Error " + xhr.status + " when trying to upload.";
-                        return
-                    }
-                    document.querySelector("#submit_result").textContent = this.response.message;
-                    // if( this.response.hide_finished_checkbox ) { document.getElementsByName( "finished" )[0].checked = false; expert_panel.style.display = "none" }
-                    if (this.response.show_password) document.getElementsByName("password")[0].style.display = "inline";
-                    if (this.response.show_overwrite) document.querySelector("#overwrite_panel").style.display = "inline";
-                };
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.send(JSON.stringify(Array.from(form.elements).reduce((accum, elem) => {
-                    if (elem.value && !(['checkbox', 'radio'].includes(elem.type) && !elem.checked)) accum[elem.name] = elem.value;
-                    return accum
-                }, {})));
-                event.preventDefault();
-            }, false);
         }
     </script>
     <style>
@@ -146,20 +108,6 @@
     <table id="control_buttons" class="dropdown" style="display:block; width: 70%;  border: 0px; margin: 0 0 50px 0">
         <tr></tr>
     </table>
-    <div id="code_panel" style="font-family: monospace; white-space: pre; margin: 50px 0">
-        <div id="code_display" data-displayed=""></div>
-        <button id="edit_button" style="display:none">Start editing</button>
-        <table id="class_list" class="dropdown" style="display:block; border: 0px; border-spacing: 10px ">
-            <tr>
-                <td colspan="2">Click below to navigate through all classes that are defined. <br>&nbsp;<br>Main demo: <span name="main_demo_link"></span></td>
-            </tr>
-            <tr style="text-align:center">
-                <td>tinywebgl-ucla.js</td>
-                <td>dependencies.js</td>
-            </tr>
-            <tr></tr>
-        </table>
-    </div>
     <form name="new_demo_source_code" style="display:none">
         <p style="margin: 50px 0"><i><b>What can I put here?</b></i> A JavaScript class, with any valid JavaScript inside. Your code can use classes from this demo, or from ANY demo on the encyclopedia of code -- the dependencies will automatically be pulled in to run your demo!<br></p>
         <textarea rows="30" cols="140" name="new_demo_code"></textarea><br>

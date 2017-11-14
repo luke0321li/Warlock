@@ -121,7 +121,7 @@ class Mob extends Moving_Object {
 
 class Goblin extends Mob {
     constructor(game, init_pos) {
-        super(game, 50, Vec.of(0.8, 1.5, 0.8), init_pos, 2, 5, 45, 2, 10, 25, 1);
+        super(game, 50, Vec.of(0.8, 1.4, 0.8), init_pos, 2, 5, 45, 2, 10, 25, 1);
     }
 
     draw(graphics_state) {

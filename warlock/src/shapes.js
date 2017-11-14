@@ -11,14 +11,39 @@ class Trapezoid extends Shape {
     }
 }
 
+class Hexagon extends Shape {
+    constructor() {
+        super();
+        let transform = Mat4.scale(Vec.of(1, Math.sqrt(3), 1)).times(Mat4.rotation(Math.PI / 4, Vec.of(0, 0, 1)));
+        for (var i = 0; i < 6; i++) {
+            transform = Mat4.rotation(Math.PI / 3, Vec.of(0, 0, 1)).times(transform);
+            Triangle.prototype.insert_transformed_copy_into(this, [], transform);
+        }
+    }
+}
+
+class Pyramid extends Shape {
+    constructor() {
+        super();
+        Square.prototype.insert_transformed_copy_into(this, [], Mat4.translation(Vec.of(0, -0.5, 0)).times(Mat4.rotation(Math.PI / 2, Vec.of(-1, 0, 0))));
+        let transform = Mat4.scale(Vec.of(Math.sqrt(2), 2, 1)).times(Mat4.rotation(-3 * Math.PI / 4, Vec.of(0, 0, 1)));
+        transform = Mat4.rotation(-1 * Math.PI / 4, Vec.of(1, 0, 0)).times(Mat4.translation(Vec.of(0, Math.sqrt(2) / 2, 0)).times(transform));
+        let move_out = Mat4.translation(Vec.of(0, 0, 0.5));
+        for (var i = 0; i < 4; i++) {
+            Triangle.prototype.insert_transformed_copy_into(this, [],Mat4.rotation(Math.PI / 2 * i, Vec.of(0, 1, 0)).times(move_out).times(transform));
+        }
+        
+    }
+}
+
 class Trapezoid_Prism extends Shape {
     constructor(top, bot, height) {
         super();
         let t = top / 2;
         let b = bot / 2;
         let h = height / 2;
-        let top_transform = Mat4.translation([0, h, 0]).times(Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0))).times(Mat4.scale([t, t, 1]));
-        let bot_transform = Mat4.translation([0, -1 * h, 0]).times(Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0))).times(Mat4.scale([b, b, 1]));
+        let top_transform = Mat4.translation([0, h, 0]).times(Mat4.rotation(-1 * Math.PI / 2, Vec.of(1, 0, 0))).times(Mat4.scale([t, t, 1]));
+        let bot_transform = Mat4.translation([0, -1 * h, 0]).times(Mat4.rotation(-1 * Math.PI / 2, Vec.of(1, 0, 0))).times(Mat4.scale([b, b, 1]));
         Square.prototype.insert_transformed_copy_into(this, [], top_transform);
         Square.prototype.insert_transformed_copy_into(this, [], bot_transform);
 
@@ -30,6 +55,17 @@ class Trapezoid_Prism extends Shape {
             let transform = Mat4.rotation(Math.PI / 2 * i, Vec.of(0, 1, 0)).times(move_out.times(tilt));
             Trapezoid.prototype.insert_transformed_copy_into(this, [top, bot, l], transform);
         }
+    }
+}
+
+class Wizard_Hat extends Shape {
+    constructor() {
+        super();
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1.6, 3, 0.4], Mat4.translation(Vec.of(0, -0.2, 0)));
+        //let top_transform = Mat4.translation(Vec.of(0, 1, 0)).times(Mat4.scale(Vec.of(0.8, 2, 0.8)));
+        //Pyramid.prototype.insert_transformed_copy_into(this, [], top_transform);
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1.0, 1.6, 0.4], Mat4.translation(Vec.of(0, 0.2, 0)));
+        Pyramid.prototype.insert_transformed_copy_into(this, [], Mat4.translation(Vec.of(0, 0.7, 0)).times(Mat4.scale(Vec.of(0.8, 2, 0.8))));
     }
 }
 
@@ -91,4 +127,14 @@ class Lightning extends Shape {
         this.indices.push(0, 1, 2, 3, 4, 5);
     }
 
+}
+
+class Goblet_Shape extends Shape {
+    constructor() {
+        super();
+        let init_pos = Mat4.translation(Vec.of(0, -1, 0));
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1, 1.2, 1], init_pos);
+        Cube.prototype.insert_transformed_copy_into(this, [], init_pos.times(Mat4.translation(Vec.of(0, 1, 0))).times(Mat4.scale(Vec.of(0.5, 0.5, 0.5))));
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [2, 1, 1], init_pos.times(Mat4.translation(Vec.of(0, 2, 0))));
+    }
 }

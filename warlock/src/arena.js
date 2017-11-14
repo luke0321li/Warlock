@@ -192,6 +192,16 @@ class Arena {
                 z = new_z;
             }
         }
+
+        if (!rand_int(0, 5)) {
+            let x = rand_num(-15, 15);
+            let z = rand_num(-15, 15);
+            while (Math.abs(x) < 12 || Math.abs(z) < 12) {
+                x = rand_num(-15, 15);
+                z = rand_num(-15, 15);
+            }
+            this.game.object_list.push(new Goblet(this.game, pos.plus(Vec.of(x, 1.6, z))));
+        }
     }
 
     spawn_mobs(pos) {
@@ -202,8 +212,7 @@ class Arena {
             for (var i = 0; i < num_mobs; i++) {
                 if (rand_int(0, 5))
                     this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 0, z))));
-                else if (this.game.level > 1)
-                {
+                else if (this.game.level > 1) {
                     if (!rand_int(0, 3))
                         this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0, z))));
                     else

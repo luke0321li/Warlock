@@ -19,3 +19,34 @@ class Crate extends Destructable {
         this.create_particles(3, this.size * 0.5, this.game.brown);
     }
 }
+
+class Goblet extends Destructable {
+    constructor(game, init_pos) {
+        super(game, 80, Vec.of(1, 3, 1), init_pos, 0);
+        this.animate_counter = 0;
+    }
+    
+    draw(graphics_state) {
+        this.game.shapes.goblet.draw(graphics_state, this.matrix, this.game.arena_black);
+        this.animate_counter += 1;
+        let time = 0.04 * Math.PI / 2 * this.animate_counter;
+        let transform = this.matrix.times(Mat4.translation(Vec.of(0, 2.5 + 0.3 * Math.sin(time), 0)));
+        let p_1 = transform.times(Mat4.rotation(time, Vec.of(0, 1, 1))).times(Mat4.translation(Vec.of(0.6, 0, 0)));
+        let p_2 = transform.times(Mat4.rotation(time, Vec.of(1, 0, 1))).times(Mat4.translation(Vec.of(-0.9, 0, 0)));
+        let p_3 = transform.times(Mat4.rotation(time, Vec.of(1, 1, 0))).times(Mat4.translation(Vec.of(0.5, 0, 0)))
+        if (this.animate_counter == 99)
+            this.animate_counter = 0;
+        this.game.shapes.box.draw(graphics_state, transform.times(Mat4.scale(Vec.of(0.3, 0.3, 0.3))), this.game.bright);
+        this.game.shapes.box.draw(graphics_state, p_1.times(Mat4.scale(Vec.of(0.15, 0.15, 0.15))), this.game.bright);
+        this.game.shapes.box.draw(graphics_state, p_2.times(Mat4.scale(Vec.of(0.15, 0.15, 0.15))), this.game.bright);
+        this.game.shapes.box.draw(graphics_state, p_3.times(Mat4.scale(Vec.of(0.15, 0.15, 0.15))), this.game.bright);
+    }
+    
+    on_death() {
+        this.create_particles(5, 0.5, this.game.arena_dark);
+        this.create_particles(7, 0.3, this.game.bright);
+        this.game.player.weapon = "Nuke";
+        this.game.player.nuke_counter = 750;
+    }
+    
+}

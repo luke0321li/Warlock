@@ -157,6 +157,7 @@ class Arena {
     }
 
     create_decorations(pos) {
+        // Create pillars
         if (!rand_int(0, 3)) {
             let num_pillars = rand_int(1, 4);
             let x = rand_num(-10, 10);
@@ -165,6 +166,7 @@ class Arena {
                 this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1.1, z)), rand_int(3, 5)));
                 let new_x = x;
                 let new_z = z;
+                // Should not be too close to each other
                 while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 10) {
                     new_x = rand_num(-10, 10);
                     new_z = rand_num(-10, 10);
@@ -173,17 +175,25 @@ class Arena {
                 z = new_z;
             }
         }
-
+        
+        // Create crates and urns
         if (!rand_int(0, 4)) {
-            let num_crates = rand_int(2, 5);
+            let num_items = rand_int(2, 5);
             let x = rand_num(-17, 17);
             let z = rand_num(-17, 17);
-            for (var i = 0; i < num_crates; i++) {
-                let crate_size = rand_num(0.8, 1.5);
-                this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, crate_size + 0.1, z)), crate_size, rand_num(0, Math.PI)));
-
+            for (var i = 0; i < num_items; i++) {
+                if (rand_int(0, 2)) {
+                    let crate_size = rand_num(0.8, 1.5);
+                    this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, crate_size + 0.1, z)), crate_size, rand_num(0, Math.PI))); 
+                }
+                
+                else {
+                    let urn_size = rand_num(0.7, 1.2);
+                    this.game.object_list.push(new Urn(this.game, pos.plus(Vec.of(x, urn_size * 1.4 + 0.1, z)), urn_size, rand_num(0, Math.PI)));
+                }
                 let new_x = x;
                 let new_z = z;
+                // Need to ensure at least 5 separation between successive creations, also preferably create them by the walls
                 while (Vec.of(new_x, 0, new_z).minus(Vec.of(x, 0, z)).norm() <= 5 || (Math.abs(new_x) < 10 && Math.abs(new_z) < 10)) {
                     new_x = rand_num(-17, 17);
                     new_z = rand_num(-17, 17);
@@ -193,7 +203,7 @@ class Arena {
             }
         }
 
-        if (!rand_int(0, 5)) {
+        if (!rand_int(0, 7)) {
             let x = rand_num(-15, 15);
             let z = rand_num(-15, 15);
             while (Math.abs(x) < 12 || Math.abs(z) < 12) {

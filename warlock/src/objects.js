@@ -7,7 +7,8 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
             collision_box: collision_box,
             pos: Vec.of(init_pos[0], init_pos[1], init_pos[2]),
             angle: init_angle,
-            type: type
+            type: type,
+            animate_counter: 0
         })
     }
 
@@ -29,6 +30,7 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
     move(dt) {}
     draw(graphics_state) {}
     on_death() {} // Do something when it is dead
+    hit_by(object) {} // Do something on collision 
 }
 
 class Idle_Object extends Game_Object {
@@ -73,5 +75,29 @@ class Pillar extends Idle_Object {
         if (this.sections == 4)
             this.game.shapes.pillar_4.draw(graphics_state, Mat4.translation(this.base_pos), this.game.arena_grey);
 
+    }
+}
+
+class Salve extends Idle_Object {
+    constructor(game, init_pos) {
+        super(game, Vec.of(1.5, 1.5, 1.5), init_pos, 0);
+    }
+    
+    draw(graphics_state) {
+        this.animate_counter += 1;
+        let rotate = Mat4.rotation(2 * Math.PI / 100 * this.animate_counter, Vec.of(0, 1, 0));
+        this.game.shapes.heart.draw(graphics_state, this.matrix.times(rotate).times(Mat4.scale(Vec.of(0.5, 0.5, 0.5))), this.game.heart_red);
+        if (this.animate_counter == 99) {
+            this.animate_counter = 0;
+        }
+    }
+    
+    hit_by(object) {
+        if (object.type == "player")
+        {
+            object.hp += 35;
+            object.hp = Math.min(object.hp, object.max_health);
+            this.hp = 0;
+        }
     }
 }

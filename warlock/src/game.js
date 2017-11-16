@@ -15,9 +15,11 @@ class Game extends Scene_Component // Main game engine
             'pillar_3': new Pillar_Shape(3),
             'pillar_4': new Pillar_Shape(4),
             'crate': new Crate_Shape(),
+            'urn': new Urn_Shape(),
             'goblet': new Goblet_Shape(),
             'aggro': new Lightning(),
             'wizard_hat': new Wizard_Hat(),
+            'heart': new Heart()
         };
 
         this.submit_shapes(context, shapes);
@@ -39,7 +41,7 @@ class Game extends Scene_Component // Main game engine
 
         Object.assign(this, {
             test: this.Phong_Model.material(Color.of(0.8, 0.7, 0.6, 1), 1, 1, 0.2, 40),
-            arena_grey: this.Phong_Model.material(Color.of(0.3, 0.3, 0.3, 1), 1, 1, 0.2, 40),
+            arena_grey: this.Phong_Model.material(Color.of(0.3, 0.3, 0.3, 1), 1, 1, .2, 40),
             arena_dark: this.Phong_Model.material(Color.of(0.29, 0.29, 0.29, 1), 0.7, 0.7, 0.2, 40),
             arena_black: this.Phong_Model.material(Color.of(0.23, 0.23, 0.23, 1), 0.7, 0.7, 0.2, 40),
             brown: this.Phong_Model.material(Color.of(0.45, 0.33, 0.25, 1), 1, 1, 0.2, 40),
@@ -48,7 +50,10 @@ class Game extends Scene_Component // Main game engine
             ogre_green: this.Phong_Model.material(Color.of(0.40, 0.46, 0.20, 1), 1, 1, 0.2, 40),
             draugr_grey: this.Phong_Model.material(Color.of(0.4, 0.4, 0.4, 1), 1, 1, 0.2, 40),
             ghost_grey: this.Phong_Model.material(Color.of(0.4, 0.4, 0.4, 0.6), 1, 1, 0.2, 40),
+            urn_grey: this.Phong_Model.material(Color.of(0.47, 0.47, 0.47, 1), 1, 1, 0.2, 40),
+            urn_brown: this.Phong_Model.material(Color.of(0.48, 0.37, 0.3, 1), 1, 1, 0.2, 40),
             aggro_red: this.Phong_Model.material(Color.of(0.75, 0.3, 0.3, 0.9), 1, 1, 0.2, 40),
+            heart_red: this.Phong_Model.material(Color.of(0.72, 0.4, 0.4, 0.95), 1, 1, 0.2, 40),
             rand_1: this.Phong_Model.material(Color.of(rand_num(0.2, 0.9), rand_num(0.2, 0.9), rand_num(0.2, 0.9), 1), 1, 1, 0.2, 40),
             damaged: this.Phong_Model.material(Color.of(0.75, 0.4, 0.4, 1), 1, 1, .2, 40),
             white: this.Phong_Model.material(Color.of(0.9, 0.9, 0.9, 1), 1, 1, 0.2, 40),

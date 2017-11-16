@@ -37,6 +37,7 @@ class Moving_Object extends Game_Object {
         let sides = [-1, 1];
         for (var i in this.game.object_list) {
             if (this.game.object_list[i].type != "projectile" && this.collide_with(this.game.object_list[i])) {
+                this.game.object_list[i].hit_by(this);
                 this.pos = this.last_free_loc;
                 return false;
             }
@@ -94,7 +95,7 @@ class Projectile extends Moving_Object {
         this.game.shapes.box.draw(graphics_state, mat.times(Mat4.scale(this.collision_box)), this.color);
     }
 
-    on_hit(target) {} // Do something when the projectile collides with another object
+    on_hit(target) {} // Do something when hit target
 }
 
 class Particle extends Projectile {
@@ -146,7 +147,7 @@ class Nuke extends Projectile {
             if (target.type == "mob" || target.type == "destructable") {
                 target.take_damage(45);
             }
-            this.hp = 0;
         }
+        this.hp = 0;
     }
 }

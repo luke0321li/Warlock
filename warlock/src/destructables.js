@@ -17,13 +17,32 @@ class Crate extends Destructable {
     
     on_death() {
         this.create_particles(3, this.size * 0.5, this.game.brown);
+        if (!rand_int(0, 5))
+            this.game.object_list.push(new Salve(this.game, this.pos.plus(Vec.of(0, 0.5, 0))));
+    }
+}
+
+class Urn extends Destructable {
+     constructor(game, init_pos, size, init_angle) {
+        super(game, 35, Vec.of(1, 2.5, 1).times(size), init_pos, init_angle);
+        this.size = size;
+        this.color = this.game.urn_brown;
+        if (!rand_int(0, 3))
+            this.color = this.game.urn_grey;
+    }
+    
+    draw(graphics_state) {
+        this.game.shapes.urn.draw(graphics_state, this.matrix.times(Mat4.scale(Vec.of(1, 1, 1).times(this.size))), this.color);
+    }
+    
+    on_death() {
+        this.create_particles(4, this.size * 0.35, this.color);
     }
 }
 
 class Goblet extends Destructable {
     constructor(game, init_pos) {
         super(game, 80, Vec.of(1, 3, 1), init_pos, 0);
-        this.animate_counter = 0;
     }
     
     draw(graphics_state) {
@@ -48,5 +67,4 @@ class Goblet extends Destructable {
         this.game.player.weapon = "Nuke";
         this.game.player.nuke_counter = 750;
     }
-    
 }

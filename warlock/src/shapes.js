@@ -138,3 +138,32 @@ class Goblet_Shape extends Shape {
         Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [2, 1, 1], init_pos.times(Mat4.translation(Vec.of(0, 2, 0))));
     }
 }
+
+class Heart extends Shape {
+    constructor() {
+        super();
+        let translate = Mat4.translation(Vec.of(0, 0.7, 0));
+        let rotate = Mat4.rotation(Math.PI / 4, Vec.of(0, 0, 1));
+        let transform_1 = rotate.times(translate).times(Mat4.scale(Vec.of(1, 1.7, 0.8)));
+        let transform_2 = rotate.times(Mat4.translation(Vec.of(1.7, 0, 0))).times(Mat4.scale(Vec.of(0.7, 1, 0.8)));
+        Cube.prototype.insert_transformed_copy_into(this, [], transform_1);
+        Cube.prototype.insert_transformed_copy_into(this, [], transform_2);
+    }
+}
+
+class Urn_Shape extends Shape {
+    constructor() {
+        super();
+        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.scale(Vec.of(0.8, 1, 0.8)));
+        let translate = Mat4.translation(Vec.of(0, 1.2, 0));
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [0.8, 1.6, 0.4], translate);
+        translate = Mat4.translation(Vec.of(0, 1.7, 0));
+        Cube.prototype.insert_transformed_copy_into(this, [], translate.times(Mat4.scale(Vec.of(0.4, 0.3, 0.4))));
+        translate = Mat4.translation(Vec.of(0, 2.1, 0));
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1.2, 0.8, 0.2], translate);
+        translate = Mat4.translation(Vec.of(0, 2.35, 0));
+        Cube.prototype.insert_transformed_copy_into(this, [], translate.times(Mat4.scale(Vec.of(0.6, 0.15, 0.6))));
+        translate = Mat4.translation(Vec.of(0, -1.2, 0));
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1.6, 1.4, 0.4], translate);
+    }
+}

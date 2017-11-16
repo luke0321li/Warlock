@@ -138,7 +138,7 @@ class Goblin extends Mob {
 
 class Ogre extends Mob {
     constructor(game, init_pos) {
-        super(game, 200, Vec.of(2, 3, 2), init_pos, 1, 4, 35, 4, 30, 50, 3);
+        super(game, 350, Vec.of(2, 3, 2), init_pos, 1, 4, 35, 4, 30, 50, 3);
     }
 
     draw(graphics_state) {
@@ -167,7 +167,7 @@ class Draugr extends Mob {
     on_death() {
         super.on_death();
         this.create_particles(3, 0.8, this.game.draugr_grey);
-        this.game.object_list.push(new Ghost(this.game, this.pos));
+        this.game.object_list.push(new Ghost(this.game, this.pos)); // Becomes a ghost when slain
     }
 }
 

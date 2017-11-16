@@ -1,6 +1,6 @@
 class Player extends Moving_Object {
     constructor(game) {
-        super(game, 200, Vec.of(1, 1.5, 1), Vec.of(0, 1.8, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 0), 0, 0, 0, 5);
+        super(game, 200, Vec.of(1.5, 1.5, 1.5), Vec.of(0, 1.8, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 0), 0, 0, 0, 5);
         Object.assign(this, {
             type: "player",
             weapon: "Fire_Bolt",
@@ -28,6 +28,17 @@ class Player extends Moving_Object {
         this.game.shapes.wizard_hat.draw(graphics_state, player_matrix.times(Mat4.translation(Vec.of(0, 1.7, 0))), color);
     }
 
+    fire() {
+        if (this.is_firing && this.fire_counter < 0) {
+            if (this.weapon == "Fire_Bolt")
+                this.game.object_list.push(new Fire_Bolt(this.game, this));
+            else if (this.weapon == "Nuke") {
+                this.game.object_list.push(new Nuke(this.game, this));
+            }
+            this.fire_counter = 10;
+        }
+    }
+
     move(dt) {
         super.move(dt);
         this.damage_counter -= 1;
@@ -37,14 +48,6 @@ class Player extends Moving_Object {
             this.is_damaged = false;
         if (!this.nuke_counter)
             this.weapon = "Fire_Bolt";
-        if (this.is_firing && this.fire_counter < 0) {
-            if (this.weapon == "Fire_Bolt")
-                this.game.object_list.push(new Fire_Bolt(this.game, this));
-            else if (this.weapon == "Nuke")
-            {
-                this.game.object_list.push(new Nuke(this.game, this));
-            }
-            this.fire_counter = 10;
-        }
+        this.fire();
     }
 }

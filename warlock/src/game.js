@@ -35,7 +35,7 @@ class Game extends Scene_Component // Main game engine
             origin: Mat4.identity(),
             Phong_Model: context.get_instance(Phong_Model),
             camera_angle: Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0)),
-            camera_location: Mat4.translation([0, -300, 0]),
+            camera_location: Mat4.translation([0, -500, 0]),
             view_mode: "Aerial"
         });
 
@@ -63,7 +63,7 @@ class Game extends Scene_Component // Main game engine
 
         this.level = 1;
         this.mob_count = 0;
-        this.map_size = 10;
+        this.map_size = 12;
         this.arena = new Arena(this, this.map_size, this.map_size);
         this.make_buttons();
         this.state = "play";
@@ -123,7 +123,7 @@ class Game extends Scene_Component // Main game engine
                 this.view_mode = "Default";
             } else {
                 this.camera_angle = Mat4.rotation(Math.PI / 2, Vec.of(1, 0, 0));
-                this.camera_location = Mat4.translation([0, -300, 0]);
+                this.camera_location = Mat4.translation([0, -500, 0]);
                 this.view_mode = "Aerial";
             }
         });

@@ -84,7 +84,7 @@ class Salve extends Idle_Object {
     }
     
     draw(graphics_state) {
-        this.animate_counter += 1;
+        this.animate_counter += this.game.dt * 5;
         let rotate = Mat4.rotation(2 * Math.PI / 100 * this.animate_counter, Vec.of(0, 1, 0));
         this.game.shapes.heart.draw(graphics_state, this.matrix.times(rotate).times(Mat4.scale(Vec.of(0.5, 0.5, 0.5))), this.game.heart_red);
         if (this.animate_counter == 99) {

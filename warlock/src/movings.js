@@ -118,7 +118,7 @@ class Particle extends Projectile {
 
 class Fire_Bolt extends Projectile {
     constructor(game, source) {
-        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5, game.rand_1);
+        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5, game.mage);
         let fluctuation = rand_num(-1, 1);
         let cosine = Math.cos(source.angle);
         let sine = Math.sin(source.angle);
@@ -126,7 +126,7 @@ class Fire_Bolt extends Projectile {
     }
 
     on_hit(target) {
-        this.create_particles(5, 0.25, this.game.rand_1)
+        this.create_particles(5, 0.25, this.color)
         if (target) {
             if (target.type == "mob" || target.type == "destructable") {
                 target.take_damage(20);
@@ -142,7 +142,7 @@ class Nuke extends Projectile {
     }
 
     on_hit(target) {
-        this.create_particles(8, 0.4, this.game.bright)
+        this.create_particles(8, 0.4, this.color)
         if (target) {
             if (target.type == "mob" || target.type == "destructable") {
                 target.take_damage(45);

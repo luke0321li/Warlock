@@ -46,11 +46,11 @@ class Mob extends Moving_Object {
         } else if (this.state == "aggro") // Runs at player and attacks 
         {
             if (player_pos.norm() < this.attack_range) {
-                if (!this.attack_counter) {
+                if (this.attack_counter <= 0) {
                     this.game.player.take_damage(this.attack_dmg)
                     this.attack_counter = this.attack_rate;
                 } else
-                    this.attack_counter -= 1;
+                    this.attack_counter -= dt * 10;
                 return true;
             }
             if (player_pos.norm() > this.vision) {
@@ -121,7 +121,7 @@ class Mob extends Moving_Object {
 
 class Goblin extends Mob {
     constructor(game, init_pos) {
-        super(game, 50, Vec.of(0.8, 1.4, 0.8), init_pos, 2, 5, 45, 2, 10, 25, 1);
+        super(game, 50, Vec.of(1, 2, 1), init_pos, 2, 5, 45, 3, 10, 50, 1);
     }
 
     draw(graphics_state) {
@@ -132,13 +132,13 @@ class Goblin extends Mob {
 
     on_death() {
         super.on_death();
-        this.create_particles(4, 0.8, this.game.goblin_green);
+        this.create_particles(5, 0.8, this.game.goblin_green);
     }
 }
 
 class Ogre extends Mob {
     constructor(game, init_pos) {
-        super(game, 350, Vec.of(2, 3, 2), init_pos, 1, 4, 35, 4, 30, 50, 3);
+        super(game, 350, Vec.of(2, 3, 2), init_pos, 1, 4, 35, 5, 30, 75, 3);
     }
 
     draw(graphics_state) {
@@ -149,31 +149,31 @@ class Ogre extends Mob {
 
     on_death() {
         super.on_death();
-        this.create_particles(4, 1.2, this.game.ogre_green);
+        this.create_particles(6, 1.2, this.game.ogre_green);
     }
 }
 
 class Draugr extends Mob {
     constructor(game, init_pos) {
-        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 3, 6, 80, 3, 15, 15, 2);
+        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 3, 6, 80, 3, 15, 40, 2);
     }
 
     draw(graphics_state) {
         super.draw(graphics_state);
         let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
-        this.game.shapes.box.draw(graphics_state, matrix, this.game.draugr_grey);
+        this.game.shapes.box.draw(graphics_state, matrix, this.game.grey);
     }
 
     on_death() {
         super.on_death();
-        this.create_particles(3, 0.8, this.game.draugr_grey);
+        this.create_particles(4, 0.8, this.game.grey);
         this.game.object_list.push(new Ghost(this.game, this.pos)); // Becomes a ghost when slain
     }
 }
 
 class Ghost extends Mob {
     constructor(game, init_pos) {
-        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 1, 2, 40, 3, 10, 30, 2);
+        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 1, 2, 40, 3, 10, 45, 2);
     }
 
     draw(graphics_state) {
@@ -184,6 +184,6 @@ class Ghost extends Mob {
 
     on_death() {
         super.on_death();
-        this.create_particles(3, 0.8, this.game.ghost_grey);
+        this.create_particles(4, 0.8, this.game.ghost_grey);
     }
 }

@@ -19,7 +19,8 @@ class Game extends Scene_Component // Main game engine
             'goblet': new Goblet_Shape(),
             'aggro': new Lightning(),
             'wizard_hat': new Wizard_Hat(),
-            'heart': new Heart()
+            'heart': new Heart(),
+            'shield': new Shield(),
         };
 
         this.submit_shapes(context, shapes);
@@ -47,6 +48,7 @@ class Game extends Scene_Component // Main game engine
             brown: this.Phong_Model.material(Color.of(0.45, 0.33, 0.25, 1), 1, 1, 0.2, 40),
             bright: this.Phong_Model.material(Color.of(0.7, 0.7, 0.1, 1), 1, 1, 0.2, 40),
             goblin_green: this.Phong_Model.material(Color.of(0.33, 0.45, 0.25, 1), 1, 1, 0.2, 40),
+            goblin_glow: this.Phong_Model.material(Color.of(0.65, 0.5, 0.35, 1), 1, 1, 0.2, 40),
             ogre_green: this.Phong_Model.material(Color.of(0.40, 0.46, 0.20, 1), 1, 1, 0.2, 40),
             grey: this.Phong_Model.material(Color.of(0.47, 0.47, 0.47, 1), 1, 1, 0.2, 40),
             ghost_grey: this.Phong_Model.material(Color.of(0.4, 0.4, 0.4, 0.6), 1, 1, 0.2, 40),
@@ -54,6 +56,9 @@ class Game extends Scene_Component // Main game engine
             aggro_red: this.Phong_Model.material(Color.of(0.75, 0.3, 0.3, 0.9), 1, 1, 0.2, 40),
             heart_red: this.Phong_Model.material(Color.of(0.72, 0.4, 0.4, 0.95), 1, 1, 0.2, 40),
             rand_1: this.Phong_Model.material(Color.of(rand_num(0.2, 0.9), rand_num(0.2, 0.9), rand_num(0.2, 0.9), 1), 1, 1, 0.2, 40),
+            shield_blue: this.Phong_Model.material(Color.of(0.5, 0.5, 0.7, 1), 1, 1, 0.2, 40),
+            shield_idle: this.Phong_Model.material(Color.of(0.5, 0.5, 0.7, 0.9), 1, 1, 0.2, 40),
+            shield_active: this.Phong_Model.material(Color.of(0.8, 0.8, 0.9, 0.9), 1, 1, 0.2, 40),
             damaged: this.Phong_Model.material(Color.of(0.75, 0.4, 0.4, 1), 1, 1, .2, 40),
             white: this.Phong_Model.material(Color.of(0.9, 0.9, 0.9, 1), 1, 1, 0.2, 40),
             dead_banner: this.Phong_Model.material(Color.of(0, 0, 0, 1), 1, 0, 0, 40, context.get_instance("assets/Endgame.png")),
@@ -67,6 +72,7 @@ class Game extends Scene_Component // Main game engine
         this.make_buttons();
         this.state = "play";
         this.dt = 0;
+        this.wait_counter = 250;
         console.log(this.rand_1.color);
     }
 
@@ -190,7 +196,10 @@ class Game extends Scene_Component // Main game engine
             }
             this.new_map();
             this.state = "play";
-        } else if (this.state == "dead" || this.state == "win")
+            this.wait_counter = 250;
+        } 
+        
+        else if (this.state == "dead" || this.state == "win")
             this.draw_end_panel(graphics_state);
 
         else if (this.state == "play") // Currently in playthrough
@@ -202,13 +211,15 @@ class Game extends Scene_Component // Main game engine
             this.dt = graphics_state.animation_delta_time * 0.01;
 
             // The player moves first
-            if (this.view_mode != "Aerial") {
+            if (this.view_mode != "Aerial" && this.player.is_alive()) {
                 this.player.move(this.dt);
             }
             this.update_camera(graphics_state);
-            this.draw_player(graphics_state);
-            this.draw_hp_bar(graphics_state);
-
+            if (this.player.is_alive()) {
+                this.draw_player(graphics_state);
+                this.draw_hp_bar(graphics_state);
+            }
+            
             // Let every object take its turn to move
             for (var i in this.object_list) {
                 if (this.object_list[i].is_alive()) {
@@ -238,7 +249,13 @@ class Game extends Scene_Component // Main game engine
             }
 
             if (!this.player.is_alive())
-                this.state = "dead";
+            {
+                if (this.wait_counter == 250)
+                    this.player.on_death();
+                this.wait_counter -= this.dt * 10;
+                if (this.wait_counter <= 0)
+                    this.state = "dead";
+            }
 
             else if (!this.mob_count)
                 this.state = "win";

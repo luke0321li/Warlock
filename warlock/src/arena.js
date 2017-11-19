@@ -99,7 +99,7 @@ class Arena {
             // Create floor
             this.game.object_list.push(new Room_Base(this.game, pos));
 
-            // Create walls and boundaries if there should be any
+            // Create random walls and boundaries if there should be any
 
             if (this.rooms[i].doors[0]) {
                 let length = rand_num(5, 9);
@@ -221,12 +221,12 @@ class Arena {
             let z = rand_num(-10, 10);
             for (var i = 0; i < num_mobs; i++) {
                 if (rand_int(0, 5))
-                    this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 0, z))));
+                    this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 0.1, z))));
                 else if (this.game.level > 1) {
                     if (!rand_int(0, 3))
-                        this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0, z))));
+                        this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0.1, z))));
                     else
-                        this.game.object_list.push(new Draugr(this.game, pos.plus(Vec.of(x, 0, z))));
+                        this.game.object_list.push(new Draugr(this.game, pos.plus(Vec.of(x, 0.1, z))));
                 }
                 let new_x = x;
                 let new_z = z;

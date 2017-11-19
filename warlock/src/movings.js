@@ -12,7 +12,7 @@ class Moving_Object extends Game_Object {
         })
     }
 
-    attempt_move(dt) // Updates velocity, angular velocity and angle; returns the new velocity using explicit euler
+    attempt_move(dt) // Updates velocity, angular velocity and angle using explicit euler. Returns the new Absolute velocity
     {
         if (this.pos[1] > (0.11 + this.collision_box[1]))
             this.a = this.a.plus(Vec.of(0, -0.5, 0));
@@ -42,7 +42,7 @@ class Moving_Object extends Game_Object {
                 return false;
             }
         }
-        this.last_free_loc = this.pos;
+        this.last_free_loc = this.pos; // Last non-colliding position the object is at
         return true;
     }
 
@@ -118,7 +118,7 @@ class Particle extends Projectile {
 
 class Fire_Bolt extends Projectile {
     constructor(game, source) {
-        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5, game.mage);
+        super(game, source, Vec.of(0.4, 0.4, 0.4), Vec.of(0, 1, -10), 0.5, game.bright);
         let fluctuation = rand_num(-1, 1);
         let cosine = Math.cos(source.angle);
         let sine = Math.sin(source.angle);

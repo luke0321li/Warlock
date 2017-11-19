@@ -30,9 +30,9 @@ class Pyramid extends Shape {
         transform = Mat4.rotation(-1 * Math.PI / 4, Vec.of(1, 0, 0)).times(Mat4.translation(Vec.of(0, Math.sqrt(2) / 2, 0)).times(transform));
         let move_out = Mat4.translation(Vec.of(0, 0, 0.5));
         for (var i = 0; i < 4; i++) {
-            Triangle.prototype.insert_transformed_copy_into(this, [],Mat4.rotation(Math.PI / 2 * i, Vec.of(0, 1, 0)).times(move_out).times(transform));
+            Triangle.prototype.insert_transformed_copy_into(this, [], Mat4.rotation(Math.PI / 2 * i, Vec.of(0, 1, 0)).times(move_out).times(transform));
         }
-        
+
     }
 }
 
@@ -165,5 +165,35 @@ class Urn_Shape extends Shape {
         Cube.prototype.insert_transformed_copy_into(this, [], translate.times(Mat4.scale(Vec.of(0.6, 0.15, 0.6))));
         translate = Mat4.translation(Vec.of(0, -1.2, 0));
         Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1.6, 1.4, 0.4], translate);
+    }
+}
+
+class Triangular_Prism extends Shape {
+    constructor() {
+        super();
+        let a = [1, 0, 0.5];
+        let b = [0, -1, 0.5];
+        let c = [-1, 0, 0.5];
+        let d = [1, 0, -0.5];
+        let e = [0, -1, -0.5];
+        let f = [-1, 0, -0.5];
+        let n1 = [0, 0, 1];
+        let n2 = [0, 0, -1];
+        let n3 = [1, -1, 0];
+        let n4 = [-1, -1, 0];
+        this.positions.push(...Vec.cast(a, b, c, a, b, d, b, e, d, d, e, f, c, e, f, b, c, e));
+        this.normals.push(...Vec.cast(n1, n1, n1, n3, n3, n3, n3, n3, n3, n2, n2, n2, n4, n4, n4, n4, n4, n4));
+        this.texture_coords.push(...Vec.cast([1, 0], [0, 0], [0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0], [0, 1]));
+        this.indices.push(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+    }
+}
+
+
+class Shield extends Shape {
+    constructor() {
+        super();
+        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.scale(Vec.of(1, 1, 0.5)));
+        let translate = Mat4.translation(Vec.of(0, -1, 0));
+        Triangular_Prism.prototype.insert_transformed_copy_into(this, [], translate);
     }
 }

@@ -24,9 +24,10 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
     }
 
     take_damage(num) {
-        this.hp -= num;
+        if (num > 0)
+            this.hp -= num;
     }
-    
+
     move(dt) {}
     draw(graphics_state) {}
     on_death() {} // Do something when it is dead
@@ -52,6 +53,7 @@ class Wall extends Idle_Object {
     }
 }
 
+// Room elements
 class Room_Base extends Idle_Object {
     constructor(game, init_pos) {
         super(game, Vec.of(0, 0, 0), init_pos, 0);
@@ -78,11 +80,12 @@ class Pillar extends Idle_Object {
     }
 }
 
+// Buffs
 class Salve extends Idle_Object {
     constructor(game, init_pos) {
         super(game, Vec.of(1.5, 1.5, 1.5), init_pos, 0);
     }
-    
+
     draw(graphics_state) {
         this.animate_counter += this.game.dt * 5;
         let rotate = Mat4.rotation(2 * Math.PI / 100 * this.animate_counter, Vec.of(0, 1, 0));
@@ -91,13 +94,39 @@ class Salve extends Idle_Object {
             this.animate_counter = 0;
         }
     }
-    
+
     hit_by(object) {
-        if (object.type == "player")
-        {
+        if (object.type == "player") {
             object.hp += 35;
             object.hp = Math.min(object.hp, object.max_health);
             this.hp = 0;
         }
     }
+}
+
+class Spell_Shield extends Idle_Object {
+    constructor(game, init_pos) {
+        super(game, Vec.of(1.5, 1.5, 1.5), init_pos, 0);
+    }
+    
+    draw(graphics_state) {
+        this.animate_counter += this.game.dt * 5;
+        let rotate = Mat4.rotation(2 * Math.PI / 100 * this.animate_counter, Vec.of(0, 1, 0));
+        let translate = Mat4.translation(Vec.of(0, -0.5, 0));
+        this.game.shapes.shield.draw(graphics_state, this.matrix.times(rotate).times(translate).times(Mat4.scale(Vec.of(0.7, 0.7, 0.7))), this.game.shield_blue);
+        translate = Mat4.translation(Vec.of(0, -0.5, 0.4));
+        this.game.shapes.shield.draw(graphics_state, this.matrix.times(rotate).times(translate).times(Mat4.scale(Vec.of(0.5, 0.5, 0.1))), this.game.shield_blue);
+
+        if (this.animate_counter == 99) {
+            this.animate_counter = 0;
+        }
+    }
+    
+    hit_by(object) {
+         if (object.type == "player") {
+            object.buffs["Shield"] = 1500;
+            this.hp = 0;
+        }
+    }
+
 }

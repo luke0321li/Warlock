@@ -17,7 +17,9 @@ class Crate extends Destructable {
 
     on_death() {
         this.create_particles(3, this.size * 0.5, this.game.brown);
-        if (!rand_int(0, 4))
+        if (!rand_int(0, 5))
+            this.game.object_list.push(new Spell_Shield(this.game, this.pos.plus(Vec.of(0, 1.1, 0))));
+        else if (!rand_int(0, 5))
             this.game.object_list.push(new Salve(this.game, this.pos.plus(Vec.of(0, 0.5, 0))));
     }
 }
@@ -37,7 +39,9 @@ class Urn extends Destructable {
 
     on_death() {
         this.create_particles(4, this.size * 0.35, this.color);
-        if (!rand_int(0, 4))
+        if (!rand_int(0, 5))
+            this.game.object_list.push(new Spell_Shield(this.game, this.pos.plus(Vec.of(0, 1.1, 0))));
+        else if (!rand_int(0, 5))
             this.game.object_list.push(new Salve(this.game, this.pos.plus(Vec.of(0, 0.5, 0))));
     }
 }
@@ -66,7 +70,7 @@ class Goblet extends Destructable {
     on_death() {
         this.create_particles(5, 0.5, this.game.arena_dark);
         this.create_particles(7, 0.3, this.game.bright);
+        this.game.player.buffs["Nuke"] = 1000;
         this.game.player.weapon = "Nuke";
-        this.game.player.nuke_counter = 750;
     }
 }

@@ -38,8 +38,7 @@ class Mob extends Moving_Object {
                     this.rest_counter = rand_int(30, 55);
                     this.state = "rest";
                 }
-            } 
-            else // Blocked
+            } else // Blocked
                 this.state = "turning";
             if (player_pos.norm() <= this.vision && this.forced_roam_counter <= 0)
                 this.state = "aggro";
@@ -70,6 +69,7 @@ class Mob extends Moving_Object {
             }
         } else if (this.state == "rest") // Rest for a while
         {
+            this.v = Vec.of(0, 0, 0);
             this.rest_counter -= 1;
             if (!this.rest_counter)
                 this.state = "roaming";
@@ -114,6 +114,30 @@ class Mob extends Moving_Object {
         }
     }
 
+    draw_arms(graphics_state, shoulder_loc, arm_scale, color) {
+        let sides = [-1, 1];
+        let arm_displacement = Mat4.translation(Vec.of(0, -1 * arm_scale[1], 0));
+        shoulder_loc = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(shoulder_loc);
+        for (var i in sides) {
+            let arm_hinge = Mat4.translation(Vec.of((this.collision_box[0] + arm_scale[0]) * sides[i], 0, 0));
+            if (this.state == "aggro")
+            {
+                let angle = Math.PI / 4 + Math.PI / 2 * Math.sin(this.attack_counter / this.attack_rate * Math.PI);
+                if (this.attack_counter <= 0)
+                    angle = Math.PI / 4;
+                arm_hinge = arm_hinge.times(Mat4.rotation(angle, Vec.of(1, 0, 0)));
+            }
+            else if (this.v.norm() > 0) {
+                arm_hinge = arm_hinge.times(Mat4.rotation(Math.sin(this.animate_counter * 0.02 * Math.PI) * sides[i], Vec.of(1, 0, 0)));
+                this.animate_counter += this.game.dt * 5;
+                if (this.animate_counter == 99)
+                    this.animate_counter = 0;
+            } else
+                this.animate_counter = 0;
+            this.game.shapes.box.draw(graphics_state, shoulder_loc.times(arm_hinge).times(arm_displacement).times(Mat4.scale(arm_scale)), color);
+        }
+    }
+
     on_death() {
         this.game.mob_count -= 1;
     }
@@ -126,8 +150,19 @@ class Goblin extends Mob {
 
     draw(graphics_state) {
         super.draw(graphics_state);
-        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
-        this.game.shapes.box.draw(graphics_state, matrix, this.game.goblin_green);
+        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
+        this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.translation(Vec.of(0, -1, 0))), this.game.arena_dark);
+        this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.translation(Vec.of(0, 1, 0))), this.game.goblin_green);
+        let arm_scale = Vec.of(0.2, 0.7, 0.4);
+        let shoulder_loc = Mat4.translation(Vec.of(0, -0.2, 0));
+        this.draw_arms(graphics_state, shoulder_loc, arm_scale, this.game.goblin_green);
+        
+        // Eyes
+        let sides = [-1, 1];
+        let eye_loc = matrix.times(Mat4.translation(Vec.of(0, 1.2, -1.01)));
+        for (var i in sides) {
+            this.game.shapes.box.draw(graphics_state, eye_loc.times(Mat4.translation(Vec.of(0.5 * sides[i], 0, 0))).times(Mat4.scale(Vec.of(0.2, 0.2, 0.01))), this.game.goblin_glow);
+        }
     }
 
     on_death() {
@@ -138,13 +173,58 @@ class Goblin extends Mob {
 
 class Ogre extends Mob {
     constructor(game, init_pos) {
-        super(game, 350, Vec.of(2, 3, 2), init_pos, 1, 4, 35, 5, 30, 75, 3);
+        super(game, 350, Vec.of(2.5, 3, 2.5), init_pos, 1, 4, 35, 5, 30, 75, 3);
     }
-
+    
     draw(graphics_state) {
         super.draw(graphics_state);
-        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
-        this.game.shapes.box.draw(graphics_state, matrix, this.game.ogre_green);
+        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
+        // Body
+        this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.translation(Vec.of(0, -2.25, 0))).times(Mat4.scale(Vec.of(2, 0.75, 2))), this.game.grey);
+        this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.translation(Vec.of(0, 0.75, 0))).times(Mat4.scale(Vec.of(2, 2.25, 2))), this.game.ogre_green);
+        
+        // Arms, 2 sections
+        let top_scale = Vec.of(0.6, 1.2, 0.6);
+        let lower_scale = Vec.of(0.8, 1.2, 0.8);
+        let shoulder_loc = matrix.times(Mat4.translation(Vec.of(0, 1.7, 0)));
+        let sides = [-1, 1];
+        let top_displacement = Mat4.translation(Vec.of(0, -1 * top_scale[1], 0));
+        let lower_displacement = Mat4.translation(Vec.of(0, -1 * lower_scale[1], 0));
+        for (var i in sides) {
+            let top_hinge = Mat4.translation(Vec.of((2 + top_scale[0]) * sides[i], 0, 0));
+            let lower_angle = Mat4.rotation(Math.PI / 4, Vec.of(1, 0, 0));
+            if (this.state == "aggro")
+            {
+                let angle = Math.PI / 4 + Math.PI / 2 * Math.sin(this.attack_counter / this.attack_rate * Math.PI);
+                if (this.attack_counter <= 0)
+                    angle = Math.PI / 4;
+                top_hinge = top_hinge.times(Mat4.rotation(angle, Vec.of(1, 0, 0)));
+                lower_angle = Mat4.rotation(angle, Vec.of(1, 0, 0));
+            }
+            else if (this.v.norm() > 0) {
+                top_hinge = top_hinge.times(Mat4.rotation(Math.sin(this.animate_counter * 0.02 * Math.PI) * sides[i], Vec.of(1, 0, 0)));
+                this.animate_counter += this.game.dt * 5;
+                if (this.animate_counter == 99)
+                    this.animate_counter = 0;
+            } else
+                this.animate_counter = 0;
+            
+            let transform = shoulder_loc.times(top_hinge).times(top_displacement);
+            this.game.shapes.box.draw(graphics_state, transform.times(Mat4.scale(top_scale)), this.game.grey);
+            transform = transform.times(top_displacement).times(lower_angle).times(lower_displacement);
+            this.game.shapes.box.draw(graphics_state, transform.times(Mat4.scale(lower_scale)), this.game.ogre_green);
+        }
+        
+        // Head
+        let head_loc = matrix.times(Mat4.translation(Vec.of(0, 2.5, -2.5)));
+        this.game.shapes.box.draw(graphics_state, head_loc.times(Mat4.scale(Vec.of(1.2, 1, 1))), this.game.ogre_green);
+        let eye_loc = head_loc.times(Mat4.translation(Vec.of(0, 0, -1.01)));
+
+        for (var i in sides) {
+             this.game.shapes.box.draw(graphics_state, eye_loc.times(Mat4.translation(Vec.of(0.8 * sides[i], 0, 0))).times(Mat4.scale(Vec.of(0.2, 0.2, 0.01))), this.game.goblin_glow);
+        }
+        
+        
     }
 
     on_death() {

@@ -222,7 +222,7 @@ class Arena {
             for (var i = 0; i < num_mobs; i++) {
                 if (rand_int(0, 5))
                     this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 0.1, z))));
-                else if (this.game.level > 1) {
+                else if (this.game.level > 0) {
                     if (!rand_int(0, 3))
                         this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0.1, z))));
                     else

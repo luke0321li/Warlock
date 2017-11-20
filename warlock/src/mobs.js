@@ -13,7 +13,7 @@ class Mob extends Moving_Object {
             force_roam_counter: 5,
             state: "roaming",
             attack_range: attack_range,
-            attack_dmg: attack_dmg,
+            attack_dmg: attack_dmg * (1 + (this.game.level - 1) * 1.45),
             attack_rate: attack_rate,
             attack_counter: 0,
             difficulty: difficulty
@@ -75,13 +75,14 @@ class Mob extends Moving_Object {
                 this.state = "roaming";
             if (player_pos.norm() <= this.vision)
                 this.state = "aggro";
-        } else if (this.state == "turning") // Blocked, try to turn away
+        } else if (this.state == "turning") // Blocked, try to take a detour
         {
             this.angle += Math.PI;
             this.distance_counter = 0;
-            this.attempted_distance = 5;
+            this.attempted_distance = this.collision_box[2] * 5;
             this.state = "detour";
-        } else if (this.state == "detour") {
+        } else if (this.state == "detour") // Take a detour to avoid blockage
+        {
             this.v = Vec.of(0, 0, -1 * this.roam_speed);
             let old_pos = this.pos;
             let turn_again = false;
@@ -117,7 +118,7 @@ class Mob extends Moving_Object {
     draw_arms(graphics_state, shoulder_loc, arm_scale, color) {
         let sides = [-1, 1];
         let arm_displacement = Mat4.translation(Vec.of(0, -1 * arm_scale[1], 0));
-        shoulder_loc = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(shoulder_loc);
+        let shoulder_transform = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.translation(shoulder_loc));
         for (var i in sides) {
             let arm_hinge = Mat4.translation(Vec.of((this.collision_box[0] + arm_scale[0]) * sides[i], 0, 0));
             if (this.state == "aggro")
@@ -134,7 +135,7 @@ class Mob extends Moving_Object {
                     this.animate_counter = 0;
             } else
                 this.animate_counter = 0;
-            this.game.shapes.box.draw(graphics_state, shoulder_loc.times(arm_hinge).times(arm_displacement).times(Mat4.scale(arm_scale)), color);
+            this.game.shapes.box.draw(graphics_state, shoulder_transform.times(arm_hinge).times(arm_displacement).times(Mat4.scale(arm_scale)), color);
         }
     }
 
@@ -154,7 +155,7 @@ class Goblin extends Mob {
         this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.translation(Vec.of(0, -1, 0))), this.game.arena_dark);
         this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.translation(Vec.of(0, 1, 0))), this.game.goblin_green);
         let arm_scale = Vec.of(0.2, 0.7, 0.4);
-        let shoulder_loc = Mat4.translation(Vec.of(0, -0.2, 0));
+        let shoulder_loc = Vec.of(0, -0.2, 0);
         this.draw_arms(graphics_state, shoulder_loc, arm_scale, this.game.goblin_green);
         
         // Eyes
@@ -218,13 +219,12 @@ class Ogre extends Mob {
         // Head
         let head_loc = matrix.times(Mat4.translation(Vec.of(0, 2.5, -2.5)));
         this.game.shapes.box.draw(graphics_state, head_loc.times(Mat4.scale(Vec.of(1.2, 1, 1))), this.game.ogre_green);
+        
+        // Eyes
         let eye_loc = head_loc.times(Mat4.translation(Vec.of(0, 0, -1.01)));
-
         for (var i in sides) {
              this.game.shapes.box.draw(graphics_state, eye_loc.times(Mat4.translation(Vec.of(0.8 * sides[i], 0, 0))).times(Mat4.scale(Vec.of(0.2, 0.2, 0.01))), this.game.goblin_glow);
-        }
-        
-        
+        }   
     }
 
     on_death() {
@@ -235,13 +235,26 @@ class Ogre extends Mob {
 
 class Draugr extends Mob {
     constructor(game, init_pos) {
-        super(game, 85, Vec.of(1, 1.8, 1), init_pos, 3, 6, 80, 3, 15, 40, 2);
+        super(game, 85, Vec.of(1.1, 2.4, 1.1), init_pos, 3, 6, 80, 3, 15, 40, 2);
     }
 
     draw(graphics_state) {
         super.draw(graphics_state);
-        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
-        this.game.shapes.box.draw(graphics_state, matrix, this.game.grey);
+        let matrix = Mat4.translation(this.pos).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.translation(Vec.of(0, -1.2, 0)));
+        this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.scale(Vec.of(1.1, 1.2, 1.1))), this.game.dark_brown);
+        this.draw_arms(graphics_state, Vec.of(0, -0.5, 0), Vec.of(0.3, 1.0, 0.5), this.game.grey);
+        // Head
+        let head_loc = matrix.times(Mat4.translation(Vec.of(0, 2.4, 0)));
+        this.game.shapes.box.draw(graphics_state, head_loc.times(Mat4.scale(Vec.of(1.2, 1.2, 1.2))), this.game.grey);
+        
+        // Mouth
+        
+        // Eyes
+        let eye_loc = head_loc.times(Mat4.translation(Vec.of(0, 0, -1.21)));
+        let sides = [-1, 1]
+        for (var i in sides) {
+             this.game.shapes.box.draw(graphics_state, eye_loc.times(Mat4.translation(Vec.of(0.6 * sides[i], 0, 0))).times(Mat4.scale(Vec.of(0.2, 0.2, 0.01))), this.game.pale_blue);
+        }
     }
 
     on_death() {
@@ -258,12 +271,19 @@ class Ghost extends Mob {
 
     draw(graphics_state) {
         super.draw(graphics_state);
-        let matrix = Mat4.translation(this.pos.plus(Vec.of(0, 1.1, 0))).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0))).times(Mat4.scale(this.collision_box));
-        this.game.shapes.box.draw(graphics_state, matrix, this.game.ghost_grey);
+        let matrix = Mat4.translation(this.pos.plus(Vec.of(0, 1.1, 0))).times(Mat4.rotation(this.angle, Vec.of(0, 1, 0)));
+        this.game.shapes.box.draw(graphics_state, matrix.times(Mat4.scale(this.collision_box)), this.game.ghost_grey);
+         // Eyes
+        let eye_loc = matrix.times(Mat4.translation(Vec.of(0, 0.9, -1.21)));
+        let sides = [-1, 1]
+        for (var i in sides) {
+             this.game.shapes.box.draw(graphics_state, eye_loc.times(Mat4.translation(Vec.of(0.6 * sides[i], 0, 0))).times(Mat4.scale(Vec.of(0.2, 0.2, 0.01))), this.game.arena_black);
+        }
     }
 
     on_death() {
         super.on_death();
         this.create_particles(4, 0.8, this.game.ghost_grey);
+        
     }
 }

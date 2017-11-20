@@ -52,7 +52,8 @@ class Goblet extends Destructable {
     }
 
     draw(graphics_state) {
-        this.game.shapes.goblet.draw(graphics_state, this.matrix, this.game.arena_black);
+        this.game.shapes.goblet.draw(graphics_state, this.matrix, this.game.goblet_black);
+        this.game.shapes.box.draw(graphics_state, this.matrix.times(Mat4.translation(Vec.of(0, 1.6, 0))).times(Mat4.scale(Vec.of(1.1, 0.1, 1.1))), this.game.arena_black);
         this.animate_counter += this.game.dt * 5;
         let time = 0.04 * Math.PI / 2 * this.animate_counter;
         let transform = this.matrix.times(Mat4.translation(Vec.of(0, 2.5 + 0.3 * Math.sin(time), 0)));

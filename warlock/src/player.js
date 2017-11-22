@@ -29,7 +29,7 @@ class Player extends Moving_Object {
             this.game.shapes.box.draw(graphics_state, transform.times(orbit_loc).times(scale), this.game.bright);
             this.game.shapes.box.draw(graphics_state, transform.times(Mat4.rotation(Math.PI, Vec.of(0, 1, 0))).times(orbit_loc).times(scale), this.game.bright);
         }
-        
+
         if (this.buffs["Shield"] > 0) {
             let color = this.game.shield_idle;
             if (this.is_damaged)
@@ -124,7 +124,7 @@ class Player extends Moving_Object {
             this.weapon = "Fire_Bolt";
         this.fire();
     }
-    
+
     on_death() {
         this.create_particles(8, 0.5, this.game.mage);
     }

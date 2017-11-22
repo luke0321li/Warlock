@@ -41,6 +41,8 @@ class Game extends Scene_Component // Main game engine
         Object.assign(this, {
             test: this.Phong_Model.material(Color.of(0.8, 0.7, 0.6, 1), 1, 1, 0.2, 40),
             arena_grey: this.Phong_Model.material(Color.of(0.3, 0.3, 0.3, 1), 1, 1, .2, 40),
+            arena_deep_grey: this.Phong_Model.material(Color.of(0.28, 0.28, 0.28, 1), 1, 1, .2, 40),
+            arena_deeper_grey: this.Phong_Model.material(Color.of(0.25, 0.25, 0.25, 1), 1, 1, .2, 40),
             arena_dark: this.Phong_Model.material(Color.of(0.29, 0.29, 0.29, 1), 0.7, 0.7, 0.2, 40),
             arena_black: this.Phong_Model.material(Color.of(0.23, 0.23, 0.23, 1), 0.7, 0.7, 0.2, 40),
             goblet_black: this.Phong_Model.material(Color.of(0, 0, 0, 1), 1, 0, 0, 40, context.get_instance("assets/urn_texture.png")),
@@ -128,7 +130,7 @@ class Game extends Scene_Component // Main game engine
         this.key_triggered_button("View map", "M", function () {
             if (this.view_mode == "Aerial") {
                 this.view_mode = "Default";
-            } else {
+            } else if (this.state == "play") {
                 this.view_mode = "Aerial";
             }
         });
@@ -203,7 +205,7 @@ class Game extends Scene_Component // Main game engine
         graphics_state.lights = [
             new Light(Vec.of(this.player.pos[0], 12, this.player.pos[2], 1), Color.of(.3, .3, .3, 1), 1000), // Lights for Phong_Shader to use*/
         ];
-        
+
         if (this.state == "main") // Start another playthrough
         {
             if (this.player.is_alive()) {
@@ -239,7 +241,7 @@ class Game extends Scene_Component // Main game engine
                 if (this.object_list[i].is_alive()) {
                     let pos_vec = this.object_list[i].pos.minus(this.player.pos);
                     let type = this.object_list[i].type;
-                    if (pos_vec.norm() <= 350) // To save energy, only draw and animate objects within a certain radius of the player
+                    if (pos_vec.norm() <= 150 || this.view_mode == "Aerial") // To save energy, only draw and animate objects within a certain radius of the player
                     {
                         // Move objects
                         if (type != "player" && type != "idle" && type != "destructable" && this.view_mode != "Aerial")
@@ -256,6 +258,7 @@ class Game extends Scene_Component // Main game engine
                     }
                 }
             }
+            
             // Remove dead objects
             for (var i in this.object_list) {
                 if (!this.object_list[i].is_alive()) {

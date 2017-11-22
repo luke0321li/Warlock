@@ -34,7 +34,7 @@ class Arena {
         }
     }
 
-    create_map(x, z) // Use flood fill to recursively create rooms on the tile map
+    create_map(x, z) // Use flood fill to recursively and randomly create rooms on the tile map
     {
         if (this.cur_rooms < this.max_rooms && !this.map[x][z]) {
             var num_neighbors = 0;
@@ -47,7 +47,7 @@ class Arena {
             if (z - 1 >= 0 && this.map[x][z - 1])
                 num_neighbors += 1;
 
-            if (num_neighbors >= rand_int(2, 4))
+            if (num_neighbors >= rand_int(2, 4)) // This number affects whether a room is connected to a lot of other rooms
                 return;
 
             this.map[x][z] = 1;
@@ -99,8 +99,7 @@ class Arena {
             // Create floor
             this.game.object_list.push(new Room_Base(this.game, pos));
 
-            // Create random walls and boundaries if there should be any
-
+            // Create random walls, doors and boundaries if there should be any
             if (this.rooms[i].doors[0]) {
                 let length = rand_num(5, 9);
                 if (!rand_int(0, 3))
@@ -146,8 +145,7 @@ class Arena {
             } else
                 this.game.object_list.push(new Wall(this.game, pos.plus(right_wall_trans), 18, Math.PI / 2));
 
-            // Create some environmental objects inside the room
-            // Mobs
+            // Create some environmental objects inside the room, like decorations and mobs
             if (this.rooms[i].center[0] || this.rooms[i].center[2]) {
                 this.create_decorations(pos);
                 this.spawn_mobs(pos);
@@ -175,7 +173,7 @@ class Arena {
                 z = new_z;
             }
         }
-        
+
         // Create crates and urns
         if (!rand_int(0, 4)) {
             let num_items = rand_int(2, 5);
@@ -184,10 +182,8 @@ class Arena {
             for (var i = 0; i < num_items; i++) {
                 if (rand_int(0, 2)) {
                     let crate_size = rand_num(0.8, 1.5);
-                    this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, crate_size + 0.1, z)), crate_size, rand_num(0, Math.PI))); 
-                }
-                
-                else {
+                    this.game.object_list.push(new Crate(this.game, pos.plus(Vec.of(x, crate_size + 0.1, z)), crate_size, rand_num(0, Math.PI)));
+                } else {
                     let urn_size = rand_num(0.7, 1.2);
                     this.game.object_list.push(new Urn(this.game, pos.plus(Vec.of(x, urn_size * 1.4 + 0.1, z)), urn_size, rand_num(0, Math.PI)));
                 }
@@ -202,7 +198,8 @@ class Arena {
                 z = new_z;
             }
         }
-
+        
+        // Create goblets
         if (!rand_int(0, 7)) {
             let x = rand_num(-15, 15);
             let z = rand_num(-15, 15);
@@ -222,7 +219,7 @@ class Arena {
             for (var i = 0; i < num_mobs; i++) {
                 if (rand_int(0, 5))
                     this.game.object_list.push(new Goblin(this.game, pos.plus(Vec.of(x, 0.1, z))));
-                else if (this.game.level > 0) {
+                else if (this.game.level > 1) {
                     if (!rand_int(0, 3))
                         this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0.1, z))));
                     else

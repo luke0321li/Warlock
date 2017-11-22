@@ -47,8 +47,7 @@ class Wall extends Idle_Object {
         
         // Create some random tile-like features on the wall
         this.tiles = [];
-        let sides = [-1, 1]
-        if (length > 4) {
+        if (length > 4 && rand_int(0, 5) > 2) {
             let num_tiles = rand_int(0, 3);
             if (length > 8)
                 num_tiles = rand_int(2, 4);
@@ -72,12 +71,19 @@ class Wall extends Idle_Object {
                     if (Math.abs(x - xs[j]) <= (ls[j] + tile_length) && Math.abs(y - ys[j]) <= (ws[j] + tile_width))
                         overlap = true;
                 }
-
+                
                 if (!overlap) {
                     ls.push(tile_length);
                     ws.push(tile_width);
                     xs.push(x);
                     ys.push(y);
+                    
+                    let sides = [-1, 1]
+                    let pick_side = rand_num(0, 3);
+                    if (!pick_side)
+                        sides = [-1];
+                    if (pick_side == 1)
+                        sides = [1];
 
                     for (var j in sides) {
                         let pos = init_pos.plus(Vec.of(x, y, sides[j] * 1.1));

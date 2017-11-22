@@ -108,14 +108,14 @@ class Game extends Scene_Component // Main game engine
         });
 
         this.key_triggered_button("Turn left", "Q", function () {
-            this.player.alpha = 2;
+            this.player.alpha = 1;
         }, undefined, function () {
             this.player.alpha = 0;
             this.player.omega = 0;
         });
 
         this.key_triggered_button("Turn right", "E", function () {
-            this.player.alpha = -2;
+            this.player.alpha = -1;
         }, undefined, function () {
             this.player.alpha = 0;
             this.player.omega = 0;
@@ -241,7 +241,7 @@ class Game extends Scene_Component // Main game engine
                 if (this.object_list[i].is_alive()) {
                     let pos_vec = this.object_list[i].pos.minus(this.player.pos);
                     let type = this.object_list[i].type;
-                    if (pos_vec.norm() <= 150 || this.view_mode == "Aerial") // To save energy, only draw and animate objects within a certain radius of the player
+                    if (pos_vec.norm() <= 300 || this.view_mode == "Aerial") // To save energy, only draw and animate objects within a certain radius of the player
                     {
                         // Move objects
                         if (type != "player" && type != "idle" && type != "destructable" && this.view_mode != "Aerial")

@@ -222,7 +222,7 @@ class Arena {
                 else if (this.game.level > 1) {
                     if (!rand_int(0, 3))
                         this.game.object_list.push(new Ogre(this.game, pos.plus(Vec.of(x, 0.1, z))));
-                    else
+                    else if (this.game.level > 2)
                         this.game.object_list.push(new Draugr(this.game, pos.plus(Vec.of(x, 0.1, z))));
                 }
                 let new_x = x;

@@ -57,16 +57,15 @@ class Wall extends Idle_Object {
             let ys = [];
             for (var i = 0; i < num_tiles; i++) {
                 let tile_width = rand_num(0.8, 1.2);
-                let tile_length = tile_width + rand_num(-0.2, 0.2);
+                let tile_length = tile_width + rand_num(-0.2, 0.4);
                 let x_bound = length - tile_length - 0.3 - 2;
                 let y_bound = 5 - tile_width - 0.3;
-                let overlap = true;
 
                 let x = rand_num(-1 * x_bound, x_bound);
                 let y = rand_num(-1 * y_bound, y_bound);
 
                 // Check if new tile overlaps with existing tiles
-                overlap = false;
+                let overlap = false;
                 for (var j = 0; j < xs.length; j++) {
                     if (Math.abs(x - xs[j]) <= (ls[j] + tile_length) && Math.abs(y - ys[j]) <= (ws[j] + tile_width))
                         overlap = true;
@@ -93,14 +92,17 @@ class Wall extends Idle_Object {
                     }
                 }
             }
-        }
+        } 
     }
 
     draw(graphics_state) {
         let trans = this.matrix.times(Mat4.scale(this.collision_box));
         this.game.shapes.box.draw(graphics_state, trans, this.game.arena_grey);
-        for (var j in this.tiles)
-            this.tiles[j].draw(graphics_state);
+        if ((this.pos.minus(this.game.player.pos)).norm() <= 50) // If player is close to a wall, the tiles on the wall will be visible
+        {
+            for (var j in this.tiles)
+                this.tiles[j].draw(graphics_state);   
+        }
     }
 }
 
@@ -125,7 +127,7 @@ class Room_Base extends Idle_Object {
     }
 
     draw(graphics_state) {
-        this.game.shapes.box.draw(graphics_state, this.matrix.times(Mat4.scale(Vec.of(20, .1, 20))), this.game.arena_deeper_grey);
+        this.game.shapes.box.draw(graphics_state, this.matrix.times(Mat4.scale(Vec.of(20, 0.1, 20))), this.game.arena_deeper_grey);
     }
 }
 

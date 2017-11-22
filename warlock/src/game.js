@@ -73,7 +73,7 @@ class Game extends Scene_Component // Main game engine
 
         this.level = 0;
         this.mob_count = 0;
-        this.map_size = 12;
+        this.map_size = 9;
         this.arena = new Arena(this, this.map_size, this.map_size);
         this.make_buttons();
         this.state = "start";

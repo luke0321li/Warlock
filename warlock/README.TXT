@@ -12,14 +12,16 @@ The dungeon is procedurally generated. Clearing up all the monsters in current
 level brings the you to the next level. The size of the dungeon being 
 generated and the damage dealt by the monsters all scale with the level.
 
-You can possibly obtain Salves(which heal you) and Shields(which provides you with
+You can possibly obtain Salves (which heal you) and Shields (which provides you with
 damage resistance) by destroying crates and urns that scatter in the dungeon. In 
-addition, destroying Goblets(yellow particles levitating above a black stand) gives
+addition, destroying Goblets (yellow particles levitating above a black stand) gives
 you temporary damage boost.
 
-Goblins (green) are the most common monsters. Ogres (large) are larger and slower. 
-Draugrs (grey) are fast, and becomes Ghosts when killed. When monsters notice your 
-presence, they will run at you and a red lightning sign will appear over their head.
+Goblins (green) are the most common monsters. Ogres (large) are larger and slower.
+They spawn at level >= 2. Draugrs (grey) are fast, and becomes Ghosts when killed.
+They spawn at level >= 3. Usually monsters will roam around the dungeon. 
+When monsters notice your presence, they will run at you and a red lightning sign
+will appear over their head.
 
 
 ---Notable Mechanical Features---
@@ -28,7 +30,8 @@ presence, they will run at you and a red lightning sign will appear over their h
 the game starts or a new level is reached the dungeon looks different. The layout of
 rooms, placement of decorative objects, tile-like bricks on the walls, and monsters 
 are all randomly decided but in a logically reasonable manner. 
-(You can press M to view the map, then press F repeatedly to observe some different layouts) (Also, see arena.js)
+(You can press M to view the map, then press F repeatedly to observe some different layouts) 
+(Also, see arena.js)
 
 2. Collision check: every drawn object is bounded by an invisible collision box. Every
 time when an object moves to a new position, the game engine checks whether its 

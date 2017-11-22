@@ -188,7 +188,6 @@ class Triangular_Prism extends Shape {
     }
 }
 
-
 class Shield extends Shape {
     constructor() {
         super();

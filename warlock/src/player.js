@@ -35,7 +35,7 @@ class Player extends Moving_Object {
             if (this.is_damaged)
                 color = this.game.shield_active;
             let orbit_loc = Mat4.translation(Vec.of(1.75, 1, 0));
-            let transform = location.times(Mat4.rotation(this.buffs["Shield"] / 50, Vec.of(0, 1, 0)));
+            let transform = location.times(Mat4.rotation(-1 * this.buffs["Shield"] / 50, Vec.of(0, 1, 0)));
             let rotate = Mat4.rotation(Math.PI / 2, Vec.of(0, 1, 0))
             this.game.shapes.shield.draw(graphics_state, transform.times(orbit_loc).times(rotate).times(Mat4.scale(Vec.of(1, 1, 0.3))), color);
         }

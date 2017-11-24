@@ -154,9 +154,9 @@ class Heart extends Shape {
 class Urn_Shape extends Shape {
     constructor() {
         super();
-        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.scale(Vec.of(0.8, 1, 0.8)));
+        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.scale(Vec.of(1, 1, 1)));
         let translate = Mat4.translation(Vec.of(0, 1.2, 0));
-        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [0.8, 1.6, 0.4], translate);
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [0.8, 2, 0.4], translate);
         translate = Mat4.translation(Vec.of(0, 1.7, 0));
         Cube.prototype.insert_transformed_copy_into(this, [], translate.times(Mat4.scale(Vec.of(0.4, 0.3, 0.4))));
         translate = Mat4.translation(Vec.of(0, 2.1, 0));
@@ -164,7 +164,7 @@ class Urn_Shape extends Shape {
         translate = Mat4.translation(Vec.of(0, 2.35, 0));
         Cube.prototype.insert_transformed_copy_into(this, [], translate.times(Mat4.scale(Vec.of(0.6, 0.15, 0.6))));
         translate = Mat4.translation(Vec.of(0, -1.2, 0));
-        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [1.6, 1.4, 0.4], translate);
+        Trapezoid_Prism.prototype.insert_transformed_copy_into(this, [2, 1.4, 0.4], translate);
     }
 }
 
@@ -194,5 +194,33 @@ class Shield extends Shape {
         Cube.prototype.insert_transformed_copy_into(this, [], Mat4.scale(Vec.of(1, 1, 0.5)));
         let translate = Mat4.translation(Vec.of(0, -1, 0));
         Triangular_Prism.prototype.insert_transformed_copy_into(this, [], translate);
+    }
+}
+
+class Table_Shape extends Shape {
+    constructor() {
+        super();
+        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.translation(Vec.of(0, 1.2, 0)).times(Mat4.scale(Vec.of(4.5, 0.3, 2))));
+        let sides = [-1, 1];
+        let leg_scale = Mat4.scale(Vec.of(0.4, 1.2, 0.4));
+        for (var i in sides) {
+            for (var j in sides) {
+                Cube.prototype.insert_transformed_copy_into(this, [], Mat4.translation(Vec.of(sides[i] * 3.5, -0.3, sides[j] * 1.4)).times(leg_scale));
+            }
+        }
+    }
+}
+
+class Chair_Shape extends Shape {
+    constructor() {
+        super();
+        Cube.prototype.insert_transformed_copy_into(this, [], Mat4.translation(Vec.of(0, 0.35, 0)).times(Mat4.scale(Vec.of(1, 0.15, 1))));
+        let sides = [-1, 1];
+        let leg_scale = Mat4.scale(Vec.of(0.25, 0.35, 0.25));
+        for (var i in sides) {
+            for (var j in sides) {
+                Cube.prototype.insert_transformed_copy_into(this, [], Mat4.translation(Vec.of(sides[i] * 0.5, -0.15, sides[j] * 0.5)).times(leg_scale));
+            }
+        }
     }
 }

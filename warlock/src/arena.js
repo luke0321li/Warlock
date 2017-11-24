@@ -21,6 +21,8 @@ class Arena {
 
         this.make_rooms();
         this.configure_rooms();
+        this.remove_conflicts();
+        console.log(this.cur_rooms);
     }
 
     create_empty_map() // Create an empty tile map
@@ -153,13 +155,26 @@ class Arena {
 
         }
     }
+    
+    remove_conflicts() // Remove generated objects that are stuck with other objects
+    {
+        for (var i in this.game.object_list) {
+            for (var j in this.game.object_list) {
+                if (this.game.object_list[i].collide_with(this.game.object_list[j]) && this.game.object_list[j].constructor.name != "Wall") {
+                    if (this.game.object_list[j].type == "mob")
+                        this.game.mob_count -= 1;
+                    this.game.object_list.splice(j, 1);
+                }
+            }
+        }
+    }
 
     create_decorations(pos) {
         // Create pillars
         if (!rand_int(0, 3)) {
             let num_pillars = rand_int(1, 4);
-            let x = rand_num(-10, 10);
-            let z = rand_num(-10, 10);
+            let x = rand_num(-5, 5);
+            let z = rand_num(-5, 5);
             for (var i = 0; i < num_pillars; i++) {
                 this.game.object_list.push(new Pillar(this.game, pos.plus(Vec.of(x, 1.1, z)), rand_int(3, 5)));
                 let new_x = x;
@@ -173,9 +188,22 @@ class Arena {
                 z = new_z;
             }
         }
-
+        
+        // Create tables and chairs
+        else if (!rand_int(0, 5)) {
+            let x = rand_num(-10, 10);
+            let z = rand_num(-10, 10);
+            let table_pos = pos.plus(Vec.of(x, 1.6, z));
+            this.game.object_list.push(new Table(this.game, table_pos, rand_num(0, 3)));
+            for (var i = 0; i < 3; i++) {
+                let chair_x = x + rand_num(2.5, 5) * (rand_int(0, 2) * 2 - 1);
+                let chair_z = z + rand_num(2.5, 5) * (rand_int(0, 2) * 2 - 1);
+                this.game.object_list.push(new Chair(this.game, table_pos.plus(Vec.of(chair_x, -1, chair_z)), rand_num(0, 3)));
+            }
+        }
+        
         // Create crates and urns
-        if (!rand_int(0, 4)) {
+        if (!rand_int(0, 3)) {
             let num_items = rand_int(2, 5);
             let x = rand_num(-17, 17);
             let z = rand_num(-17, 17);

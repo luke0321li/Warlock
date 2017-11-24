@@ -14,6 +14,8 @@ class Game extends Scene_Component // Main game engine
             'ball': new Subdivision_Sphere(4),
             'pillar_3': new Pillar_Shape(3),
             'pillar_4': new Pillar_Shape(4),
+            'table': new Table_Shape(),
+            'chair': new Chair_Shape(),
             'crate': new Crate_Shape(),
             'urn': new Urn_Shape(),
             'goblet': new Goblet_Shape(),
@@ -37,7 +39,8 @@ class Game extends Scene_Component // Main game engine
             Phong_Model: context.get_instance(Phong_Model),
             view_mode: "Default"
         });
-
+        
+        // Colors
         Object.assign(this, {
             test: this.Phong_Model.material(Color.of(0.8, 0.7, 0.6, 1), 1, 1, 0.2, 40),
             arena_grey: this.Phong_Model.material(Color.of(0.3, 0.3, 0.3, 1), 1, 1, .2, 40),
@@ -73,8 +76,7 @@ class Game extends Scene_Component // Main game engine
 
         this.level = 0;
         this.mob_count = 0;
-        this.map_size = 9;
-        this.arena = new Arena(this, this.map_size, this.map_size);
+        this.map_size = 6; // 6 + 4 = 10 initial rooms
         this.make_buttons();
         this.state = "start";
         this.dt = 0;

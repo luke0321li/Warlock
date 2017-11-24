@@ -45,20 +45,6 @@ class Moving_Object extends Game_Object {
         this.last_free_loc = this.pos; // Last non-colliding position the object is at
         return true;
     }
-
-    collide_with(game_object) // Returns true if this collides with game_object
-    {
-        if (this === game_object)
-            return false;
-        let other_pos = game_object.pos;
-        let cur_pos = rotate_vec(this.pos, -1 * game_object.angle);
-        other_pos = rotate_vec(other_pos, -1 * game_object.angle);
-        let other_box = game_object.collision_box;
-        let collide = true;
-        for (let i = 0; i < 3; i++)
-            collide &= (Math.abs(cur_pos[i] - other_pos[i]) < (this.collision_box[i] + other_box[i]));
-        return collide;
-    }
 }
 
 class Projectile extends Moving_Object {

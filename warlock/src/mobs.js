@@ -1,7 +1,7 @@
 // States: "roaming", "aggro", "rest", "turning"
 
 class Mob extends Moving_Object {
-    constructor(game, hp, collision_box, init_pos, roam_speed, aggro_speed, vision, attack_range, attack_dmg, attack_rate, difficulty) {
+    constructor(game, hp, collision_box, init_pos, roam_speed, aggro_speed, vision, attack_range, attack_dmg, attack_rate) {
         super(game, hp, collision_box, Vec.of(init_pos[0], .1 + collision_box[1], init_pos[2]), Vec.of(0, 0, 0), Vec.of(roam_speed, 0, 0), 0, 0, rand_num(0, Math.PI * 2), aggro_speed);
         Object.assign(this, {
             type: "mob",
@@ -13,10 +13,9 @@ class Mob extends Moving_Object {
             force_roam_counter: 5,
             state: "roaming",
             attack_range: attack_range,
-            attack_dmg: attack_dmg * (1 + (this.game.level - 1) * 1.45),
+            attack_dmg: attack_dmg * (1 + (this.game.level - 1) * 1.15),
             attack_rate: attack_rate,
-            attack_counter: 0,
-            difficulty: difficulty
+            attack_counter: attack_rate,
         })
         this.game.mob_count += 1;
     }
@@ -46,7 +45,10 @@ class Mob extends Moving_Object {
         {
             if (player_pos.norm() < this.attack_range) {
                 if (this.attack_counter <= 0) {
-                    this.game.player.take_damage(this.attack_dmg)
+                    let sound = new Audio(this.sound);
+                    sound.volume = 0.4;
+                    sound.play();
+                    this.game.player.take_damage(this.attack_dmg);
                     this.attack_counter = this.attack_rate;
                 } else
                     this.attack_counter -= dt * 10;
@@ -144,7 +146,7 @@ class Mob extends Moving_Object {
 
 class Goblin extends Mob {
     constructor(game, init_pos) {
-        super(game, 50, Vec.of(1, 2, 1), init_pos, 2, 4, 45, 3, 8, 50, 1);
+        super(game, 50, Vec.of(1, 2, 1), init_pos, 2, 4, 45, 3, 8, 50);
     }
 
     draw(graphics_state) {

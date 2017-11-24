@@ -28,7 +28,7 @@ will appear over their head.
 
 1. Procedural generation: the dungeon is procedurally generated, so every time when
 the game starts or a new level is reached the dungeon looks different. The layout of
-rooms, placement of decorative objects, tile-like bricks on the walls, and monsters 
+rooms, placement of decorative objects (pillars, urns, crates, etc.) and monsters 
 are all randomly decided but in a logically reasonable manner. 
 (You can press M to view the map, then press F repeatedly to observe some different layouts) 
 (Also, see arena.js)
@@ -36,7 +36,7 @@ are all randomly decided but in a logically reasonable manner.
 2. Collision check: every drawn object is bounded by an invisible collision box. Every
 time when an object moves to a new position, the game engine checks whether its 
 collision box collides with that of other objects using some simple maths. If so, the 
-object is moved back its last non-colliding position. (See movings.js)
+object is moved back its last non-colliding position. (See objects.js and movings.js)
 
 3. Physics: all moving objects' motion are modelled using explicit Euler, by updating 
 acceleration, velocity and position every time display() is called. As a result, for

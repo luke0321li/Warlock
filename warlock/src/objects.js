@@ -32,6 +32,20 @@ class Game_Object // Base class for player, mobs, items and projectiles etc.
     draw(graphics_state) {}
     on_death() {} // Do something when it is dead
     hit_by(object) {} // Do something on collision 
+    
+    collide_with(game_object) // Returns true if this collides with game_object
+    {
+        if (this === game_object)
+            return false;
+        let other_pos = game_object.pos;
+        let cur_pos = rotate_vec(this.pos, -1 * game_object.angle);
+        other_pos = rotate_vec(other_pos, -1 * game_object.angle);
+        let other_box = game_object.collision_box;
+        let collide = true;
+        for (let i = 0; i < 3; i++)
+            collide &= (Math.abs(cur_pos[i] - other_pos[i]) < (this.collision_box[i] + other_box[i]));
+        return collide;
+    }
 }
 
 class Idle_Object extends Game_Object {
@@ -44,80 +58,12 @@ class Idle_Object extends Game_Object {
 class Wall extends Idle_Object {
     constructor(game, init_pos, length, init_angle) {
         super(game, Vec.of(length, 5, 1), init_pos, init_angle);
-        
-        // Create some random tile-like features on the wall
-        this.tiles = [];
-        if (length > 4 && rand_int(0, 5) > 2) {
-            let num_tiles = rand_int(0, 3);
-            if (length > 8)
-                num_tiles = rand_int(2, 4);
-            let ls = [];
-            let ws = [];
-            let xs = [];
-            let ys = [];
-            for (var i = 0; i < num_tiles; i++) {
-                let tile_width = rand_num(0.8, 1.2);
-                let tile_length = tile_width + rand_num(-0.2, 0.4);
-                let x_bound = length - tile_length - 0.3 - 2;
-                let y_bound = 5 - tile_width - 0.3;
-
-                let x = rand_num(-1 * x_bound, x_bound);
-                let y = rand_num(-1 * y_bound, y_bound);
-
-                // Check if new tile overlaps with existing tiles
-                let overlap = false;
-                for (var j = 0; j < xs.length; j++) {
-                    if (Math.abs(x - xs[j]) <= (ls[j] + tile_length) && Math.abs(y - ys[j]) <= (ws[j] + tile_width))
-                        overlap = true;
-                }
-                
-                if (!overlap) {
-                    ls.push(tile_length);
-                    ws.push(tile_width);
-                    xs.push(x);
-                    ys.push(y);
-                    
-                    let sides = [-1, 1]
-                    let pick_side = rand_num(0, 3);
-                    if (!pick_side)
-                        sides = [-1];
-                    if (pick_side == 1)
-                        sides = [1];
-
-                    for (var j in sides) {
-                        let pos = init_pos.plus(Vec.of(x, y, sides[j] * 1.1));
-                        if (init_angle)
-                            pos = init_pos.plus(Vec.of(sides[j] * 1.1, y, x));
-                        this.tiles.push(new Wall_Tile(game, pos, tile_length, tile_width, init_angle));
-                    }
-                }
-            }
-        } 
     }
 
     draw(graphics_state) {
         let trans = this.matrix.times(Mat4.scale(this.collision_box));
         this.game.shapes.box.draw(graphics_state, trans, this.game.arena_grey);
-        if ((this.pos.minus(this.game.player.pos)).norm() <= 50) // If player is close to a wall, the tiles on the wall will be visible
-        {
-            for (var j in this.tiles)
-                this.tiles[j].draw(graphics_state);   
-        }
     }
-}
-
-class Wall_Tile extends Idle_Object {
-    constructor(game, init_pos, length, width, init_angle) {
-        super(game, Vec.of(length, width, 0.1), init_pos, init_angle);
-        this.color = game.arena_deep_grey;
-        if (rand_int(0, 2))
-            this.color = game.arena_deeper_grey;
-    }
-
-    draw(graphics_state) {
-        this.game.shapes.box.draw(graphics_state, this.matrix.times(Mat4.scale(this.collision_box)), this.color);
-    }
-
 }
 
 // Room elements
@@ -144,6 +90,26 @@ class Pillar extends Idle_Object {
         if (this.sections == 4)
             this.game.shapes.pillar_4.draw(graphics_state, Mat4.translation(this.base_pos), this.game.arena_grey);
 
+    }
+}
+
+class Table extends Idle_Object {
+    constructor(game, init_pos, init_angle) {
+        super(game, Vec.of(4.5, 1.5, 2), init_pos, init_angle);
+    }
+    
+    draw(graphics_state) {
+        this.game.shapes.table.draw(graphics_state, this.matrix, this.game.dark_brown);
+    }
+}
+
+class Chair extends Idle_Object {
+    constructor(game, init_pos, init_angle) {
+        super(game, Vec.of(1, 1, 1), init_pos, init_angle);
+    }
+    
+    draw(graphics_state) {
+        this.game.shapes.chair.draw(graphics_state, this.matrix, this.game.dark_brown);
     }
 }
 

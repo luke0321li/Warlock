@@ -1,5 +1,5 @@
 # Warlock
-Warlock - a WebGL game demo
+Warlock - a WebGL game demo.
 An experimental roguelike duneon crawling game created for UCLA's computer graphics course. 
 
 # How to launch

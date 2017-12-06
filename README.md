@@ -17,4 +17,4 @@ to launch the server. Then in Chrome, visit the url `localhost:8000`
 Please visit `warlock/README.TXT` for more details. 
 
 # Quick screenshot
-<img src="https://github.com/lukevastus/Warlock/blob/master/warlock/demos/screenshot.jpg" style="width: 50px"/>
+<img src="https://github.com/lukevastus/Warlock/blob/master/warlock/demos/screenshot.jpg"/>
